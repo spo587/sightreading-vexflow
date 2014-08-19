@@ -1,23 +1,37 @@
 <!DOCTYPE html>
 <html>
 <head>
-
+    <title>
+        The sightreading page
+    </title>
     
 </head>
 
 <body>
-    <script src="http://code.jquery.com/jquery-2.1.1.min.js"></script>
-    <script src='http://www.vexflow.com/support/vexflow-min.js'></script>
-    <script src='http://www.vexflow.com/support/vexflow-debug.js'></script>
+    <script src="https://code.jquery.com/jquery-2.1.1.min.js"></script>
+    <script src='https://dl.dropboxusercontent.com/u/95890750/vexflow_sightreading/vexflow-min.js'></script>
+    <script src='https://dl.dropboxusercontent.com/u/95890750/vexflow_sightreading/vexflow-debug.js'></script>
 
         <div class='image'>
             
         </div>   
         <div class='example a' example='a'>
             <p>
-                <button type='button' class='reveal-piece'>put speed in and then click here to show your music</button>
-                <button type='button'>click when ready to start</button>
                 <input type='text' class='slider-speed'></input>
+                <button type='button' class='reveal-piece'>see music!</button>
+                <button type='button' id='button-1'>start first piece!</button>
+                <button type='button' id='button-2'>start second piece!</button>
+            </p>
+            <p>
+                First, enter a speed in the input box (a number 1-10, or leave it blank for the default speed). <br>
+                Then, click the first button to reveal your two sightreading pieces (only level 1 for now).
+                Click the next button to start the first one. There will be 2 second delay, then the blackout will start scrolling across the screen, so be ready!
+                Click the last button when you're ready for the second example. Just refresh the page for new examples.
+            </p>
+            <p>
+
+                
+                
 
                 <canvas class='canvas-class' id='canvas-id' width="1300" height="1000">
             
@@ -28,7 +42,7 @@
                 </canvas>
 
             <p>
-            <script src='sightreading.js'>
+            <script src='https://dl.dropboxusercontent.com/u/95890750/vexflow_sightreading/sightreading.js'>
             </script>
 
                 

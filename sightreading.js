@@ -127,8 +127,15 @@ function makeSteps(rhythms_nested, pinkyDegree, level) {
 }
 
 function makePianoStaffSingleLine(numBars, key, timeSig, width, height) {
-    var bars_rh = makeBars(numBars,height, width);
-    var bars_lh = makeBars(numBars, height+80, width);
+    //todo make the first bar bigger
+    var bars_rh = makeBars(numBars, height, width);
+    //var add_to_rh = makeBars(numBars - 1, height, width);
+    var bars_lh = makeBars(numBars, height + 80, width);
+    // var add_to_lh = makeBars(numBars - 1, height + 80, width);
+    // for (var i=0; i<add_to_lh.length; i+= 1) {
+    //     bars_rh.push(add_to_rh[i]);
+    //     bars_lh.push(add_to_lh[i]);
+    // }
     bars_rh[0].addClef('treble');
     bars_rh[0].addTimeSignature(timeSig);
     bars_rh[0].addKeySignature(key);
@@ -152,14 +159,18 @@ function makePianoStaffSingleLine(numBars, key, timeSig, width, height) {
     return {bars_rh: bars_rh, bars_lh: bars_lh};
 }
 
-function makePianoStaffMultipleLines(key, timeSig, barsPerLine, numLines) {
+function makePianoStaffMultipleLines(key, timeSig, barsPerLine, numLines, distance_from_top) {
     if (key === undefined) {
         var key = 'C';
     }
-    var distance_from_top = 10;
+    //var distance_from_top = 10;
     var lines = [];
     for (var i=0; i<numLines; i+=1) {
-        var line = makePianoStaffSingleLine(barsPerLine, key, timeSig, 1200/barsPerLine, distance_from_top);
+        var line = makePianoStaffSingleLine(barsPerLine, key, timeSig, 900/barsPerLine, distance_from_top);
+        if (i === numLines - 1) { // add double bar to end of the multiple lines
+            var newConnector = new Vex.Flow.StaveConnector(line.bars_rh[barsPerLine], line.bars_lh[barsPerLine]);
+            newConnector.setType(Vex.Flow.StaveConnector.type.END).setContext(ctx).draw();
+        }
         distance_from_top += 200;
         lines.push(line);
     }
@@ -194,16 +205,16 @@ function createSingleNote(chroma, octave, accidental, duration, clef, fingering)
     }
     //fingering not working, below....not sure why
     if (fingering !== undefined) {
-        console.log('assigning fingering??');
+        //console.log('assigning fingering??');
         note.addModifier(0, newStringNumber('5', Vex.Flow.Modifier.Position.LEFT));
     }
     //tried adding fingering with text annotation, this shit is currently FUCKED
     var a = newAnnotation("Text", 1, 1);
-    console.log(note);
+    //console.log(note);
     var e = new Vex.Flow.StaveNote({ keys: ["c/3"], duration: "q"});
     e.addAnnotation(0, newAnnotation("Text", 1, 1));
     //note.addAnotation(0, newAnnotation("Text", 1, 1));
-    console.log(note);
+    //console.log(note);
     return note;
 }
 
@@ -418,7 +429,7 @@ function generateLine(rhythms_nested, steps_nested, key, octave, beatsPer, stave
     }
 }
 
-function makeSightreading(numBars, beatsPer, key, level, hand, barsPerLine) {
+function makeSightreading(numBars, beatsPer, key, level, hand, barsPerLine, distance_from_top) {
     /// randomly generate a sightreading exercise, generating rhythms and scale steps in a line in each hand separately
     // then transposing to the given key
     //TODO add fingerings!!!
@@ -427,20 +438,29 @@ function makeSightreading(numBars, beatsPer, key, level, hand, barsPerLine) {
     var first_octave = first_hand === 'r' ? 4 : 3;
     var second_octave = first_hand == 'r' ? 3 : 4; 
     var scale = new SharpMajorScale(key);
-    var m = makePianoStaffMultipleLines(scale.tonic,String(beatsPer) + '/' + '4', barsPerLine, 4);
+    var TwoSystems = makePianoStaffMultipleLines(scale.tonic,String(beatsPer) + '/' + '4', barsPerLine, 2, distance_from_top);
     var rhythms_r = makeRhythms(numBars, beatsPer);
     var steps_r = makeSteps(rhythms_r, 4, level);
     // start in measure 0
     var start = 0;
-    generateLine(rhythms_r, steps_r, key, first_octave, beatsPer, m, first_hand, start, barsPerLine);
+    generateLine(rhythms_r, steps_r, key, first_octave, beatsPer, TwoSystems, first_hand, start, barsPerLine);
     start += numBars;
     var rhythms_l = makeRhythms(numBars, beatsPer);
     var steps_l = makeSteps(rhythms_l, 4, level);
-    generateLine(rhythms_l, steps_l, key, second_octave, beatsPer, m, second_hand, start, barsPerLine);
+    generateLine(rhythms_l, steps_l, key, second_octave, beatsPer, TwoSystems, second_hand, start, barsPerLine);
 
+    // start += numBars;
+    // var rhythms_r = makeRhythms(numBars, beatsPer);
+    // var steps_r = makeSteps(rhythms_r, 4, level);
+    // generateLine(rhythms_r, steps_r, key, first_octave, beatsPer, m, first_hand, start, barsPerLine);
+    // start += numBars;
+    // console.log(start)
+    // var rhythms_l = makeRhythms(numBars, beatsPer);
+    // var steps_l = makeSteps(rhythms_l, 4, level);
+    // generateLine(rhythms_l, steps_l, key, second_octave, beatsPer, m, second_hand, start, barsPerLine);
 }
 
-function makeRandomSightReading(numBars, level, barsPerLine) {
+function makeRandomSightReading(numBars, level, barsPerLine, distance_from_top) {
     // has to be 6 bar length lines for now. fix this!!
     // 8 bars total;
     var first_hand = ['r', 'l'];
@@ -449,7 +469,7 @@ function makeRandomSightReading(numBars, level, barsPerLine) {
     var beatsPer = beats[Math.floor(Math.random() * beats.length)];
     var keys = [0, 2, 7];
     var key = keys[Math.floor(Math.random() * keys.length)];
-    makeSightreading(numBars, beatsPer, key, level, hand, barsPerLine);
+    makeSightreading(numBars, beatsPer, key, level, hand, barsPerLine, distance_from_top);
 
 }
 
@@ -472,6 +492,7 @@ function formatNotes(notes,stave) {
 
 function scrollAcross(vx_speed, initial_x, initial_y, system_spacing){
 
+
     var W = canvas.width;
     var H = canvas.height;
      
@@ -480,24 +501,44 @@ function scrollAcross(vx_speed, initial_x, initial_y, system_spacing){
       var  w = 10;
        var h = 120;
      
-
+    var go;
+    var go2;
     var vx = vx_speed;
-    function draw() {  //can this function not take parameters??    
+    var lineCounter = 1;
+    function draw() {  //can this function not take parameters?? 
+ 
         x += vx;
-        // function repeat() {
-        //     ctx.fillRect(x,y,w,h)
-        // }
         ctx.fillRect(x, y, w, h);
-        if (x > W-60) {
+
+        if (x > W - 360 && lineCounter < 2) { //lineCounter counts how many lines we've gone through!
+            // we want the scroller to stop after two lines 
+            //console.log(lineCounter);
+            lineCounter += 1;
             y += system_spacing;
             x = initial_x;
             x += vx;
             ctx.fillRect(x,y,w,h);
+            
         }
+        
+        else if (x > W - 360 && lineCounter == 2) {
+            console.log('ending early');
+            return null     
+        }
+        setTimeout(draw, 20);
     }
 
-    $('button').click(function(){
-        setInterval(draw,1000/30);
+
+    $('#button-1').click(function() {
+        setTimeout(draw,2000);
+
+    });
+    $('#button-2').click(function() {   
+        lineCounter = 1;
+        y += system_spacing;
+        x = initial_x;
+        vx = vx_speed; 
+        setTimeout(draw, 2000);
     });
 }
 
@@ -515,7 +556,8 @@ $('.reveal-piece').click(function(){
     scrollAcross(speed,110,50,200);
     //function makeSightreading(numBars, beatsPer, key, level, hand) {
     //makeSightreading(8, 4, 4, 1, 'l');
-    makeRandomSightReading(4, 1, 4);
+    makeRandomSightReading(4, 1, 4, 10);
+    makeRandomSightReading(4, 1, 4, 410);
 
     
 });
