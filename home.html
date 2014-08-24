@@ -8,48 +8,70 @@
 </head>
 
 <body>
+    <header>
+        <h1> Welcome to the piano sight reading page by Sam Post, level 1-2 </h1>
+
+        </header>
     <script src="https://code.jquery.com/jquery-2.1.1.min.js"></script>
     <script src='https://dl.dropboxusercontent.com/u/95890750/vexflow_sightreading/vexflow-min.js'></script>
     <script src='https://dl.dropboxusercontent.com/u/95890750/vexflow_sightreading/vexflow-debug.js'></script>
-
-        <div class='image'>
-            
-        </div>   
-        <div class='example a' example='a'>
+   
+        
             <p>
+                <button type='button' id='level-1'>level 1</button>
+                <button type='button' id='level-2'>level 2</button>
                 <input type='text' class='slider-speed'></input>
-                <button type='button' class='reveal-piece'>see music!</button>
+                
                 <button type='button' id='button-1'>start first piece!</button>
-                <button type='button' id='button-2'>start second piece!</button>
+                
             </p>
             <p>
-                First, enter a speed in the input box (a number 1-10, or leave it blank for the default speed). <br>
-                Then, click the first button to reveal your two sightreading pieces (only level 1 for now).
-                Click the next button to start the first one. There will be 2 second delay, then the blackout will start scrolling across the screen, so be ready!
-                Click the last button when you're ready for the second example. Just refresh the page for new examples.
+                 
+                First, click level 1 or level 2 to generate two new exercises. <br>
+
+
+                Click the next button to start the first one. There will be 2 second delay, then the blackout will start scrolling across the screen, so be ready! You can alter the speed by entering a number 1-10 before you start. 1 if very slow, 10 is very, very fast.
+                Click the last button when you're ready for the second example. You can click for new examples at any time without refreshing the page.
             </p>
-            <p>
+            
 
-                
+             
                 
 
-                <canvas class='canvas-class' id='canvas-id' width="1300" height="1000">
+                <canvas class='canvas-class' id='canvas-1' width="1300" height="400">
             
                 </canvas>
-            </p>
-                <canvas class='canvas-class' id='canvas-2' width="1300" height="120">
+            
+                
+            <div id='second-button'>
+            <p>
+            <button type='button' id='button-2'>start second piece!</button>
+        </p>
+    </div>
+
+
+        <div id='second-canvas' style="position:absolute; top:650px; left:0px; z-index:1"> 
+
+
+                <canvas class='canvas-class' id='canvas-2' width="1300" height="400">
             
                 </canvas>
 
-            <p>
+        </div>
             <script src='https://dl.dropboxusercontent.com/u/95890750/vexflow_sightreading/sightreading.js'>
             </script>
+            <div>
+                <p>
+                    The sight reading page is in the alpha stage of development. Email samueljpost@gmail.com with questions or bug reports.
+                </p>
+            </div>
+
 
                 
 
                 
-            </p>
-        </div>
+            
+        
   
 
 

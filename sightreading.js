@@ -1,17 +1,19 @@
 
-// find screen width??
-// multiple examples in a row
-// speed and level buttons
+// todo: find screen width??
+// minor scales
+// more rhythms (dotted half)
 
 
-var canvas = document.getElementById('canvas-id');
+var canvas = document.getElementById('canvas-1');
 var renderer = new Vex.Flow.Renderer(canvas,
 Vex.Flow.Renderer.Backends.CANVAS);
 //var ctx = new renderer(canvas, 400, 300)
 
 var ctx = renderer.getContext();
 
-
+var canvas2 = document.getElementById('canvas-2');
+var renderer2 = new Vex.Flow.Renderer(canvas2, Vex.Flow.Renderer.Backends.CANVAS);
+var ctx2 = renderer2.getContext();
 
 function makeBars(numBars, height, width) {
     /// make a bunch of bar instances for vex flow
@@ -126,7 +128,7 @@ function makeSteps(rhythms_nested, pinkyDegree, level) {
     return notes_with_meter;
 }
 
-function makePianoStaffSingleLine(numBars, key, timeSig, width, height) {
+function makePianoStaffSingleLine(numBars, key, timeSig, width, height, context, major_or_minor) {
     //todo make the first bar bigger
     var bars_rh = makeBars(numBars, height, width);
     //var add_to_rh = makeBars(numBars - 1, height, width);
@@ -138,38 +140,45 @@ function makePianoStaffSingleLine(numBars, key, timeSig, width, height) {
     // }
     bars_rh[0].addClef('treble');
     bars_rh[0].addTimeSignature(timeSig);
-    bars_rh[0].addKeySignature(key);
+    if (major_or_minor === 'm') {
+        var keySig = key + 'm';
+    }
+    else {
+        var keySig = key;
+    }
+    bars_rh[0].addKeySignature(keySig);
+    
     bars_lh[0].addClef('bass');
     bars_lh[0].addTimeSignature(timeSig);
-    bars_lh[0].addKeySignature(key);
+    bars_lh[0].addKeySignature(keySig);
     var connectors = [];
-    bars_rh[0].setContext(ctx).draw();
-    bars_lh[0].setContext(ctx).draw();
+    bars_rh[0].setContext(context).draw();
+    bars_lh[0].setContext(context).draw();
     var newConnector = new Vex.Flow.StaveConnector(bars_rh[0], bars_lh[0]);
-    newConnector.setType(Vex.Flow.StaveConnector.type.BRACE).setContext(ctx).draw();
+    newConnector.setType(Vex.Flow.StaveConnector.type.BRACE).setContext(context).draw();
     for (var i=0; i<numBars; i+=1) {
-        bars_rh[i].setContext(ctx).draw();
-        bars_lh[i].setContext(ctx).draw();
+        bars_rh[i].setContext(context).draw();
+        bars_lh[i].setContext(context).draw();
         var newConnector1 = new Vex.Flow.StaveConnector(bars_rh[i], bars_lh[i]);
         var newConnector2 = new Vex.Flow.StaveConnector(bars_rh[i], bars_lh[i]);
         // connectors.push(newConnector);
-        newConnector1.setType(Vex.Flow.StaveConnector.type.SINGLE_LEFT).setContext(ctx).draw();
-        newConnector2.setType(Vex.Flow.StaveConnector.type.SINGLE_RIGHT).setContext(ctx).draw();
+        newConnector1.setType(Vex.Flow.StaveConnector.type.SINGLE_LEFT).setContext(context).draw();
+        newConnector2.setType(Vex.Flow.StaveConnector.type.SINGLE_RIGHT).setContext(context).draw();
     }
     return {bars_rh: bars_rh, bars_lh: bars_lh};
 }
 
-function makePianoStaffMultipleLines(key, timeSig, barsPerLine, numLines, distance_from_top) {
+function makePianoStaffMultipleLines(key, timeSig, barsPerLine, numLines, distance_from_top, context, major_or_minor) {
     if (key === undefined) {
         var key = 'C';
     }
     //var distance_from_top = 10;
     var lines = [];
     for (var i=0; i<numLines; i+=1) {
-        var line = makePianoStaffSingleLine(barsPerLine, key, timeSig, 900/barsPerLine, distance_from_top);
+        var line = makePianoStaffSingleLine(barsPerLine, key, timeSig, 900/barsPerLine, distance_from_top, context, major_or_minor);
         if (i === numLines - 1) { // add double bar to end of the multiple lines
             var newConnector = new Vex.Flow.StaveConnector(line.bars_rh[barsPerLine], line.bars_lh[barsPerLine]);
-            newConnector.setType(Vex.Flow.StaveConnector.type.END).setContext(ctx).draw();
+            newConnector.setType(Vex.Flow.StaveConnector.type.END).setContext(context).draw();
         }
         distance_from_top += 200;
         lines.push(line);
@@ -258,7 +267,6 @@ function SharpMajorScale(halfStepsFromC) {
     // above the tonic note
     //all indexed to 0
     var transpose_dict_sharp_from_c = {0: 'C', 1:'C#', 2:'D', 3:'D#', 4:'E', 5:'F', 6:'F#', 7:'G', 8:'G#', 9:'A', 10:'A#', 11:'B'};
-
     this.steps = {};
     this.steps = {'0':transpose_dict_sharp_from_c[halfStepsFromC]};
     var scaleHalfSteps = [0, 2, 4, 5, 7, 9, 11];
@@ -279,6 +287,7 @@ function SharpMajorScale(halfStepsFromC) {
 
         }
     }
+    //create the reverse dict
     for (var prop in this.steps) {
         if (this.steps.hasOwnProperty(prop)) {
             this.steps_reverse[this.steps[prop]] = prop;
@@ -296,12 +305,53 @@ function SharpMajorScale(halfStepsFromC) {
 }
 
 
+function SharpMinorScale(halfStepsFromC) {
+    this.relativeMajor = new SharpMajorScale((halfStepsFromC + 3) % 12);
+    this.steps = {};
+    // move all of the relative major's properties down two steps
+    for (var prop in this.relativeMajor.steps) {
+        if (this.relativeMajor.steps.hasOwnProperty(prop) && Number(prop)) { //no sharps or flats
+            this.steps[(Number(prop) + 2) % 7] = this.relativeMajor.steps[prop];
+        }
+        else if (this.relativeMajor.steps.hasOwnProperty(prop) && prop.length === 2) { //accidental
+            this.steps[((Number(prop.slice(0,1)) + 2) % 7) + prop.slice(1)] = this.relativeMajor.steps[prop];
+        }
+    }
+    this.steps[2] = this.relativeMajor.steps[0];  //not sure why the above didn't do this....okay for now
+    //create the reverse mapping
+    this.steps_reverse = {};
+    for (var prop in this.steps) {
+        if (this.steps.hasOwnProperty(prop)) {
+            this.steps_reverse[this.steps[prop]] = prop;
+        }
+    }
+    this.scaleStepsToHalfSteps = {0:0, 1:2, 2:3, 3:5, 4:7, 5:6, 6:10};
+    this.halfStepsFromC = halfStepsFromC;
+    this.tonic = this.steps[0];
+}
 
-function transposeVoice(voice, oldKey_steps_from_c, newKey_steps_from_c) {
+function makeScale(halfStepsFromC, major_or_minor) {
+    if (major_or_minor == 'm'){
+        return new SharpMinorScale(halfStepsFromC);
+    }
+    else {
+        return new SharpMajorScale(halfStepsFromC)
+    }
+}
+
+function transposeVoice(voice, oldKey_steps_from_c, newKey_steps_from_c, major_or_minor) { //start here tomorrow!!
     //takes the notes of the voice, converts them to scale degrees, and spits back the scale degrees in the new voice, 
     // converted back to notes
-    var oldScale = new SharpMajorScale(oldKey_steps_from_c);
-    var newScale = new SharpMajorScale(newKey_steps_from_c);
+    var oldScale = makeScale(oldKey_steps_from_c, major_or_minor);
+    var newScale = makeScale(newKey_steps_from_c, major_or_minor);
+    // if (major_or_minor = 'm') {
+    //     var oldScale = new SharpMinorScale(oldKey_steps_from_c);
+    //     var newScale = new SharpMinorScale(newKey_steps_from_c);
+    // }
+    // else {
+    //      var oldScale = new SharpMajorScale(oldKey_steps_from_c);
+    //      var newScale = new SharpMajorScale(newKey_steps_from_c);
+    // }
     var notes = voice.tickables;
     for (var i=0; i<notes.length; i+=1) {
         var keyProps = notes[i].keyProps[0]
@@ -359,13 +409,13 @@ function transposeVoice(voice, oldKey_steps_from_c, newKey_steps_from_c) {
     }
 }
 
-function makeLine(rhythms, scaleDegrees, key, melodyOctave, clef) {
+function makeLine(rhythms, scaleDegrees, key, melodyOctave, clef, major_or_minor) {
     /// makes a line for a single hand, multiple bars, and returns the notes to be rendered later
     // make sure arrays have same length
     // key input should be half steps from c
     var notes = [];
     var cScale = new SharpMajorScale(0);    
-    var scale = new SharpMajorScale(key);
+    var scale = makeScale(key, major_or_minor);
     for (var i=0; i<rhythms.length; i+=1) {
         //for melodies that dip below tonic, scale degree negative, make it positive again and change the octave
         if (scaleDegrees[i].slice(0,2) < 0) {
@@ -385,8 +435,10 @@ function makeLine(rhythms, scaleDegrees, key, melodyOctave, clef) {
 }
 
 
-function generateLine(rhythms_nested, steps_nested, key, octave, beatsPer, stave, hand, startMeasure, barsPerLine) {
+function generateLine(rhythms_nested, steps_nested, key, octave, beatsPer, stave, hand, startMeasure, barsPerLine, major_or_minor) {
+    //stave input is a multiple line piano staff
     // takes the inputs and renders the line to the appropriate staff
+    var context = stave[0].bars_lh[0].getContext(); //will this work?
     var staveLine = 0;
     if (startMeasure > barsPerLine) {
         staveLine = 1;
@@ -409,7 +461,7 @@ function generateLine(rhythms_nested, steps_nested, key, octave, beatsPer, stave
             measureCounter = 0;
         }
     
-        var a = makeLine(rhythms_nested[i],steps_nested[i], key, octave, clef);
+        var a = makeLine(rhythms_nested[i],steps_nested[i], key, octave, clef, major_or_minor);
         
         var v = createVoice(a, beatsPer, 4);
         
@@ -417,19 +469,19 @@ function generateLine(rhythms_nested, steps_nested, key, octave, beatsPer, stave
         var beams = Vex.Flow.Beam.applyAndGetBeams(v);
         
         if (hand === 'r') {
-            formatVoice(v, stave[staveLine].bars_rh[measureCounter]);
+            formatVoice(v, stave[staveLine].bars_rh[measureCounter], context);
         }
         else {
-            formatVoice(v, stave[staveLine].bars_lh[measureCounter]);
+            formatVoice(v, stave[staveLine].bars_lh[measureCounter], context);
         };
         beams.forEach(function(beam){
-            beam.setContext(ctx).draw();
+            beam.setContext(context).draw();
         });
         measureCounter += 1
     }
 }
 
-function makeSightreading(numBars, beatsPer, key, level, hand, barsPerLine, distance_from_top) {
+function makeSightreading(numBars, beatsPer, key, level, hand, barsPerLine, distance_from_top, context, major_or_minor) {
     /// randomly generate a sightreading exercise, generating rhythms and scale steps in a line in each hand separately
     // then transposing to the given key
     //TODO add fingerings!!!
@@ -438,16 +490,16 @@ function makeSightreading(numBars, beatsPer, key, level, hand, barsPerLine, dist
     var first_octave = first_hand === 'r' ? 4 : 3;
     var second_octave = first_hand == 'r' ? 3 : 4; 
     var scale = new SharpMajorScale(key);
-    var TwoSystems = makePianoStaffMultipleLines(scale.tonic,String(beatsPer) + '/' + '4', barsPerLine, 2, distance_from_top);
+    var TwoSystems = makePianoStaffMultipleLines(scale.tonic,String(beatsPer) + '/' + '4', barsPerLine, 2, distance_from_top, context, major_or_minor);
     var rhythms_r = makeRhythms(numBars, beatsPer);
     var steps_r = makeSteps(rhythms_r, 4, level);
     // start in measure 0
     var start = 0;
-    generateLine(rhythms_r, steps_r, key, first_octave, beatsPer, TwoSystems, first_hand, start, barsPerLine);
+    generateLine(rhythms_r, steps_r, key, first_octave, beatsPer, TwoSystems, first_hand, start, barsPerLine, major_or_minor);
     start += numBars;
     var rhythms_l = makeRhythms(numBars, beatsPer);
     var steps_l = makeSteps(rhythms_l, 4, level);
-    generateLine(rhythms_l, steps_l, key, second_octave, beatsPer, TwoSystems, second_hand, start, barsPerLine);
+    generateLine(rhythms_l, steps_l, key, second_octave, beatsPer, TwoSystems, second_hand, start, barsPerLine, major_or_minor);
 
     // start += numBars;
     // var rhythms_r = makeRhythms(numBars, beatsPer);
@@ -460,55 +512,57 @@ function makeSightreading(numBars, beatsPer, key, level, hand, barsPerLine, dist
     // generateLine(rhythms_l, steps_l, key, second_octave, beatsPer, m, second_hand, start, barsPerLine);
 }
 
-function makeRandomSightReading(numBars, level, barsPerLine, distance_from_top) {
+function makeRandomSightReading(numBars, level, barsPerLine, distance_from_top, context) {
     // has to be 6 bar length lines for now. fix this!!
     // 8 bars total;
     var first_hand = ['r', 'l'];
     var hand = first_hand[Math.floor(Math.random() * first_hand.length)];
     var beats = [3, 4];
     var beatsPer = beats[Math.floor(Math.random() * beats.length)];
-    var keys = [0, 2, 7];
+    if (level == 2) {
+        var keys = [0, 2, 4, 5, 7, 9];
+        major_or_minors = ['M', 'm'];
+    }
+    else {
+        var keys = [0, 2, 7, 9];
+        major_or_minors = ['M'];
+    }
     var key = keys[Math.floor(Math.random() * keys.length)];
-    makeSightreading(numBars, beatsPer, key, level, hand, barsPerLine, distance_from_top);
+    var major_or_minor = major_or_minors[Math.floor(Math.random() * major_or_minors.length)];
+    makeSightreading(numBars, beatsPer, key, level, hand, barsPerLine, distance_from_top, context, major_or_minor);
 
 }
 
 
-function formatVoice(voice, stave) {
+function formatVoice(voice, stave, context) {
     //render a voice to the stave
     var formatter = new Vex.Flow.Formatter().joinVoices([voice]).
     formatToStave([voice], stave);
-    voice.draw(ctx,stave);
+    voice.draw(context,stave);
 }
 
 
-function formatNotes(notes,stave) {
+function formatNotes(notes,stave, context) {
     /// not using this function right now, but can render notes without a voice if you want
-    Vex.Flow.Formatter.FormatAndDraw(ctx, stave, notes);
+    Vex.Flow.Formatter.FormatAndDraw(context, stave, notes);
 }
 
 
-//create and invoke function for scrolling black shit across the screen
+//create function for scrolling black shit across the screen
 
-function scrollAcross(vx_speed, initial_x, initial_y, system_spacing){
-
-
+function scrollAcross(initial_x, initial_y, system_spacing){
     var W = canvas.width;
     var H = canvas.height;
-     
-    var x = initial_x; //change to 110 and it doesn't work anymore....wtf???
-     var   y = initial_y;
-      var  w = 10;
-       var h = 120;
-     
-    var go;
-    var go2;
-    var vx = vx_speed;
+    var x = initial_x; 
+    var y = initial_y;
+    var w = 10;
+    var h = 120;
+
+    //var vx = speed;
     var lineCounter = 1;
-    function draw() {  //can this function not take parameters?? 
- 
-        x += vx;
-        ctx.fillRect(x, y, w, h);
+    this.drawer = function draw(speed, context) { 
+        x += speed;
+        context.fillRect(x, y, w, h);
 
         if (x > W - 360 && lineCounter < 2) { //lineCounter counts how many lines we've gone through!
             // we want the scroller to stop after two lines 
@@ -516,48 +570,103 @@ function scrollAcross(vx_speed, initial_x, initial_y, system_spacing){
             lineCounter += 1;
             y += system_spacing;
             x = initial_x;
-            x += vx;
-            ctx.fillRect(x,y,w,h);
+            x += speed;
+            context.fillRect(x,y,w,h);
             
         }
         
         else if (x > W - 360 && lineCounter == 2) {
-            console.log('ending early');
             return null     
         }
-        setTimeout(draw, 20);
+        setTimeout(function drawHelper() {this.drawer(speed, context)}, 20);
     }
 
 
-    $('#button-1').click(function() {
-        setTimeout(draw,2000);
+function isCanvasBlank(canvas) {
+    var blank = document.createElement('canvas');
+    blank.width = canvas.width;
+    blank.height = canvas.height;
 
-    });
-    $('#button-2').click(function() {   
-        lineCounter = 1;
-        y += system_spacing;
-        x = initial_x;
-        vx = vx_speed; 
-        setTimeout(draw, 2000);
-    });
+    return canvas.toDataURL() == blank.toDataURL();
 }
 
 
-$('.reveal-piece').click(function(){
+    $('#button-1').click(function() {
+        var speed = Number($('.slider-speed').val());
+        if (speed === undefined || speed === 0) {
+            speed = 2;
+        }
+        //check if there's music on the canvas before scrolling!
+        //if (!isCanvasBlank(canvas)) {
+        setTimeout(function (){this.drawer(speed, ctx)},2000);
+        //}
+        
+
+    });
+    $('#button-2').click(function() { 
+        var speed = Number($('.slider-speed').val());
+        if (speed === undefined || speed === 0) {
+            speed = 2;
+        }
+        lineCounter = 1;
+        //y += system_spacing;
+        y = initial_y;
+        x = initial_x;
+        w= 10;
+        h = 120; 
+        // check if music has been put on the canvas already!
+        //if (!isCanvasBlank(canvas2)) {
+        setTimeout(function() {this.drawer(speed, ctx2)}, 2000);
+        //}   
+        
+    });
+}
+
+// $('#button-1').click(function() {
+//     var speed = Number($('.slider-speed').val());
+//     if (speed === undefined || speed === 0) {
+//         speed = 2;
+//     }
+//     scrollAcross(speed,110,50,200);
+
+//     setTimeout(function (){draw(speed)},2000);
+// });
+
+
+//$('.reveal-piece').click(function(){
     
     //if you add keysig or timesig after already drawing the bars, have to re-draw, as below
     // m[0].bars_lh[1].addKeySignature('E')
     // m[0].bars_lh[1].setContext(ctx).draw()
-    var speed = Number($('.slider-speed').val());
-    if (speed === undefined || speed === 0) {
-        speed = 2
-    }
-    
-    scrollAcross(speed,110,50,200);
-    //function makeSightreading(numBars, beatsPer, key, level, hand) {
-    //makeSightreading(8, 4, 4, 1, 'l');
-    makeRandomSightReading(4, 1, 4, 10);
-    makeRandomSightReading(4, 1, 4, 410);
 
     
-});
+scrollAcross(110,50,200);
+   
+function clearCanvas(context) {
+    context.save();
+    context.setTransform(1,0,0,1,0,0);
+    context.clearRect(0, 0, canvas.width, canvas.height);
+    context.restore();
+
+} 
+    //function makeSightreading(numBars, beatsPer, key, level, hand) {
+    //makeSightreading(8, 4, 4, 1, 'l');
+$('#level-1').click(function(){
+    // Store the current transformation matrix
+    clearCanvas(ctx);
+    clearCanvas(ctx2)
+    makeRandomSightReading(4, 1, 4, 10, ctx);
+//makeRandomSightReading(4, 1, 4, 410, ctx);
+    makeRandomSightReading(4, 1, 4, 10, ctx2);
+})
+
+var levelTwo = $('#level-2').click(function(){
+    clearCanvas(ctx);
+    clearCanvas(ctx2);
+    makeRandomSightReading(4, 2, 4, 10, ctx);
+//makeRandomSightReading(4, 1, 4, 410, ctx);
+    makeRandomSightReading(4, 2, 4, 10, ctx2);
+})
+    
+
+    
