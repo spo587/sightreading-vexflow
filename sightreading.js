@@ -45,8 +45,23 @@ function makeRhythms(numMeasures, beatsPer) {
             beat = beat % beatsPer;
             measures += 1;
         }
-        if (beat === 0 || beat == beatsPer/2) {
+        if (beat === 0) { //|| beat == beatsPer/2) {
             randNum = Math.random();
+            if (randNum < 0.4) {
+                rhythms[measures].push('q');
+                beat += 1;
+            }
+            else if (randNum < 0.8) {
+                rhythms[measures].push('h');
+                beat += 2;
+            }
+            else {
+                console.log(randNum);
+                rhythms[measures].push('hd');
+                beat += 3;
+            }
+        }
+        else if (beat == beatsPer/2) {
             if (randNum < 0.5) {
                 rhythms[measures].push('q');
                 beat += 1;
@@ -103,25 +118,59 @@ function NextStepDegree(currentScaleDegree, pinkyDegree, level) {
     }   
 }
 
-function makeSteps(rhythms_nested, pinkyDegree, level) {
+function makeSteps(rhythms_nested, pinkyDegree, level, open_or_closed) {
     //combines the rhythms and generates a bunch of scale degrees to go along with.
+    // open phrase starts on tonic and ends anywhere
+    // closed phrase starts anywhere and ends on tonic
     // returned in a nested array
     var numnotes = 0;
     for (var i=0; i<rhythms_nested.length; i++) {
         numnotes += rhythms_nested[i].length;    //find out how many total notes there are in rhythms array
     }
-    var notes = ['0']; // this ensures melody will always end on tonic. necessary?
-    for (var i=1; i<numnotes; i++) {
-        notes.push(NextStepDegree(notes[i-1], pinkyDegree, level));  //build simple array of scale degrees
+    var notes = []
+    if (open_or_closed == 'closed') {
+        notes.push('0'); // this ensures closed melody will always end on tonic.
+        for (var i=1; i<numnotes; i++) {
+            notes.push(NextStepDegree(notes[i-1], pinkyDegree, level));  //build simple array of scale degrees
+        }
+        var finalNotes = notes.reverse()
     }
-    notes.reverse();
+    else { //open melody
+        var beginningNotes = []; //lets compose the melody from the front and the back, they'll meet in the middle
+        // var endNotes = [];
+        // var possible_notes = ['2', '4']; //open melody ends on 3rd of 5th scale degree
+        // var firstNote = possible_notes[Math.floor(Math.random() * possible_notes.length)];
+        // endNotes.push(firstNote); //end on 3rd or 5th
+        beginningNotes.push('0');
+        //console.log(numnotes);
+        for (var i = 1; i < numnotes; i += 1) {
+            //endNotes.push(NextStepDegree(endNotes[i - 1], pinkyDegree, level));
+            beginningNotes.push(NextStepDegree(beginningNotes[i - 1], pinkyDegree, level));
+            }
+            // endNotes.reverse();
+            // console.log(beginningNotes);
+            // console.log(endNotes);
+            
+            
+            // if (endNotes.length + beginningNotes.length !== numnotes) {
+            //     console.log('lengths dont match');
+            //     beginningNotes.push(NextStepDegree(beginningNotes[i-1], pinkyDegree, level));
+            
+            
+            var finalNotes = beginningNotes //.concat(endNotes);
+            //console.log(finalNotes)
+        
+        
+    }
+    
+    //notes.reverse();
     var notes_with_meter = [];
     // put the steps in nested arrays, each inner array for a single measure
     var ind = 0;
     for (var i=0; i<rhythms_nested.length; i++) {
         notes_with_meter.push([]);
         for (var j=0; j<rhythms_nested[i].length; j++) {
-            notes_with_meter[i].push(notes[j+ind]);
+            notes_with_meter[i].push(finalNotes[j+ind]);
         }
         ind += rhythms_nested[i].length;
     }
@@ -141,10 +190,10 @@ function makePianoStaffSingleLine(numBars, key, timeSig, width, height, context,
     bars_rh[0].addClef('treble');
     bars_rh[0].addTimeSignature(timeSig);
     if (major_or_minor === 'm') {
-        var keySig = key + 'm';
+        var keySig = new SharpMinorScale(key).tonic + 'm';
     }
     else {
-        var keySig = key;
+        var keySig = new SharpMajorScale(key).tonic;
     }
     bars_rh[0].addKeySignature(keySig);
     
@@ -170,7 +219,7 @@ function makePianoStaffSingleLine(numBars, key, timeSig, width, height, context,
 
 function makePianoStaffMultipleLines(key, timeSig, barsPerLine, numLines, distance_from_top, context, major_or_minor) {
     if (key === undefined) {
-        var key = 'C';
+        var key = 0;
     }
     //var distance_from_top = 10;
     var lines = [];
@@ -305,8 +354,8 @@ function SharpMajorScale(halfStepsFromC) {
 }
 
 
-function SharpMinorScale(halfStepsFromC) {
-    this.relativeMajor = new SharpMajorScale((halfStepsFromC + 3) % 12);
+function SharpMinorScale(halfStepsFromC_of_rel_maj) {
+    this.relativeMajor = new SharpMajorScale(halfStepsFromC_of_rel_maj);
     this.steps = {};
     // move all of the relative major's properties down two steps
     for (var prop in this.relativeMajor.steps) {
@@ -326,16 +375,16 @@ function SharpMinorScale(halfStepsFromC) {
         }
     }
     this.scaleStepsToHalfSteps = {0:0, 1:2, 2:3, 3:5, 4:7, 5:6, 6:10};
-    this.halfStepsFromC = halfStepsFromC;
+    this.halfStepsFromC = (halfStepsFromC_of_rel_maj - 3 + 12) % 12;
     this.tonic = this.steps[0];
 }
 
-function makeScale(halfStepsFromC, major_or_minor) {
+function makeScale(halfStepsFromC_of_rel_maj, major_or_minor) {
     if (major_or_minor == 'm'){
-        return new SharpMinorScale(halfStepsFromC);
+        return new SharpMinorScale(halfStepsFromC_of_rel_maj);
     }
     else {
-        return new SharpMajorScale(halfStepsFromC)
+        return new SharpMajorScale(halfStepsFromC_of_rel_maj);
     }
 }
 
@@ -490,15 +539,15 @@ function makeSightreading(numBars, beatsPer, key, level, hand, barsPerLine, dist
     var first_octave = first_hand === 'r' ? 4 : 3;
     var second_octave = first_hand == 'r' ? 3 : 4; 
     var scale = new SharpMajorScale(key);
-    var TwoSystems = makePianoStaffMultipleLines(scale.tonic,String(beatsPer) + '/' + '4', barsPerLine, 2, distance_from_top, context, major_or_minor);
+    var TwoSystems = makePianoStaffMultipleLines(key, String(beatsPer) + '/' + '4', barsPerLine, 2, distance_from_top, context, major_or_minor);
     var rhythms_r = makeRhythms(numBars, beatsPer);
-    var steps_r = makeSteps(rhythms_r, 4, level);
+    var steps_r = makeSteps(rhythms_r, 4, level, 'open');
     // start in measure 0
     var start = 0;
     generateLine(rhythms_r, steps_r, key, first_octave, beatsPer, TwoSystems, first_hand, start, barsPerLine, major_or_minor);
     start += numBars;
     var rhythms_l = makeRhythms(numBars, beatsPer);
-    var steps_l = makeSteps(rhythms_l, 4, level);
+    var steps_l = makeSteps(rhythms_l, 4, level, 'closed');
     generateLine(rhythms_l, steps_l, key, second_octave, beatsPer, TwoSystems, second_hand, start, barsPerLine, major_or_minor);
 
     // start += numBars;
@@ -520,12 +569,12 @@ function makeRandomSightReading(numBars, level, barsPerLine, distance_from_top, 
     var beats = [3, 4];
     var beatsPer = beats[Math.floor(Math.random() * beats.length)];
     if (level == 2) {
-        var keys = [0, 2, 4, 5, 7, 9];
+        var keys = [0, 2, 4, 7, 9];
         major_or_minors = ['M', 'm'];
     }
     else {
-        var keys = [0, 2, 7, 9];
-        major_or_minors = ['M'];
+        var keys = [0, 7];
+        major_or_minors = ['M', 'm'];
     }
     var key = keys[Math.floor(Math.random() * keys.length)];
     var major_or_minor = major_or_minors[Math.floor(Math.random() * major_or_minors.length)];
