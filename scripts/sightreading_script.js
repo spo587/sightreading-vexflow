@@ -6,17 +6,21 @@
 // modularize??
 
 
-
-
 //set up the two canvases as vexflow objects
-var canvas = document.getElementById('canvas-1');
-var renderer = new Vex.Flow.Renderer(canvas,
-Vex.Flow.Renderer.Backends.CANVAS);
-//var ctx = new renderer(canvas, 400, 300)
-var ctx = renderer.getContext();
-var canvas2 = document.getElementById('canvas-2');
-var renderer2 = new Vex.Flow.Renderer(canvas2, Vex.Flow.Renderer.Backends.CANVAS);
-var ctx2 = renderer2.getContext();
+//using global variables. not sure how else? ctx and ctx2 get called a bunch
+
+function makeContext(elementId) {
+    var canvas = document.getElementById(elementId);
+    var renderer = new Vex.Flow.Renderer(canvas, Vex.Flow.Renderer.Backends.CANVAS);
+    var ctx = renderer.getContext();
+    return ctx
+}
+
+var ctx = makeContext('canvas-1');
+var ctx2 = makeContext('canvas-2');
+
+
+
 
 
 
@@ -707,7 +711,7 @@ function makeRandomSightReading(numBars, level, barsPerLine, distance_from_top, 
 function clearCanvas(context) {
     context.save();
     context.setTransform(1,0,0,1,0,0);
-    context.clearRect(0, 0, canvas.width, canvas.height);
+    context.clearRect(0, 0, context.canvas.width, context.canvas.height);
     context.restore();
 
 } 
@@ -800,8 +804,8 @@ $('#replace-example-2').click(function(){
 
 
 function scrollAcross(initial_x, initial_y, system_spacing, beatsPerFirst, beatsPerSecond, callInterval){
-    var W = canvas.width;
-    var H = canvas.height;
+    var W = 1300;
+    var H = 400;
     var x = initial_x; 
     var y = initial_y;
     var w = 10;
