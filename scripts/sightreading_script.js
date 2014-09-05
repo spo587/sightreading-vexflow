@@ -697,106 +697,6 @@ function makeRandomSightReading(numBars, level, barsPerLine, distance_from_top, 
 
 
 
-//create function for scrolling black shit across the screen
-
-// //tried it a diff way, not working
-// var scrollAcross = {
-//     setup : function(initial_x, initial_y, system_spacing, beatsPerFirst, beatsPerSecond, callInterval) {
-//         return {x: initial_x, y: initial_y, W: canvas.width, H: canvas.height, w : 10, h: 120, lineCounter: 1};
-//     },
-//     draw : function drawer(speed, context, initial_x, initial_y, system_spacing, beatsPerFirst, beatsPerSecond, callInterval) {
-//         //var drawHelper = this.draw(speed, context, initial_x, initial_y, system_spacing, beatsPerFirst, beatsPerSecond, callInterval);
-//         var x = initial_x;
-//         var y = initial_y;
-//         var W = canvas.width;
-//         var H = canvas.height;
-//         var w = 10;
-//         var h = 120;
-//         var lineCounter = 1;
-//         var speedConverter = beatsPerFirst * 53 / 4;
-//         x +=  speed / speedConverter;
-//         context.fillRect(x, y, w, h);
-//         if (x > W - 300 && lineCounter < 2) { //lineCounter counts how many lines we've gone through!
-//             // we want the scroller to stop after two lines 
-//             //console.log(lineCounter);
-//             lineCounter += 1;
-//             y += system_spacing;
-//             x = initial_x;
-//             x += speed / speedConverter;
-//             context.fillRect(x,y,w,h);
-//         }
-//         else if (x > W - 300 && lineCounter === 2) {
-//             console.log('timeout cleared');
-//             return undefined;  
-//         }
-//         var timeoutID = window.setTimeout(function(){scrollAcross.draw(speed, context, initial_x, initial_y, system_spacing, beatsPerFirst, beatsPerSecond, callInterval)}, callInterval);
-//     }
-// }
-
-// $('#button-1').click(function() {
-//     var beatsPerExample1 = getBeats[0];
-//     var beatsPerExample2 = getBeats[1];
-//     var x = 100; 
-//     var y = 50;
-//     var w = 10;
-//     var h = 120;
-//     //lineCounter = 1;
-//     var speed = Number($('.slider-speed').val());
-//     if (speed === undefined || speed === 0) {
-//         speed = 80;
-//     }
-//     //check if there's music on the canvas before scrolling!
-//     //if (!isCanvasBlank(canvas)) {
-//     var timeout = setTimeout(function (){scrollAcross.draw(speed, ctx, x, y, 200, beatsPerExample1, beatsPerExample2, 20)}, 2000);
-    
-//     //}
-    
-
-// });
-
-// function start(context) { //why does this function get called when clicking the level 1 button??
-//     console.log('function called');
-//     x = initial_x; 
-//     y = initial_y;
-//     w = 10;
-//     h = 120;
-//     lineCounter = 1;
-//     var speed = Number($('.slider-speed').val());
-//     if (speed === undefined || speed === 0) {
-//         speed = 80;
-//     }
-//     //check if there's music on the canvas before scrolling!
-//     //if (!isCanvasBlank(canvas)) {
-//     var timeout = setTimeout(function (){this.drawer(speed, context)}, 3*60/speed*1000 + 400);
-//     var count = 3 //3 beats
-//     $('#timer').text('countdown:  3');
-//     var counter = setInterval(timer, 55*1000/speed);
-//     var clicker = setInterval(sound, 55*1000/speed);
-//     function sound() {
-//         document.getElementById('click').play(); //no jquery??
-//     }
-    
-//     function timer() {
-//         count = count - 1;
-//         if (count <= 0) {
-//            clearInterval(counter);
-//            clearInterval(clicker);
-//            $('#timer').text('start!');
-//            return;
-//         }
-
-//         $('#timer').text('countdown:  ' + String(count)); // watch for spelling
-//     }
-//     sound();
-            
-//     //}
-    
-
-// }
-
-
-
-
 //below are the functions for the extra fun shit the page does, ie the black scroller and the beat thing.
 // here's where the organization is a mess. 
 //specifically there's one bug i don't quite understand:
@@ -986,7 +886,101 @@ function scrollAcross(initial_x, initial_y, system_spacing, beatsPerFirst, beats
 }
 
 
-  
+
+// //tried it a diff way, not working
+// var scrollAcross = {
+//     setup : function(initial_x, initial_y, system_spacing, beatsPerFirst, beatsPerSecond, callInterval) {
+//         return {x: initial_x, y: initial_y, W: canvas.width, H: canvas.height, w : 10, h: 120, lineCounter: 1};
+//     },
+//     draw : function drawer(speed, context, initial_x, initial_y, system_spacing, beatsPerFirst, beatsPerSecond, callInterval) {
+//         //var drawHelper = this.draw(speed, context, initial_x, initial_y, system_spacing, beatsPerFirst, beatsPerSecond, callInterval);
+//         var x = initial_x;
+//         var y = initial_y;
+//         var W = canvas.width;
+//         var H = canvas.height;
+//         var w = 10;
+//         var h = 120;
+//         var lineCounter = 1;
+//         var speedConverter = beatsPerFirst * 53 / 4;
+//         x +=  speed / speedConverter;
+//         context.fillRect(x, y, w, h);
+//         if (x > W - 300 && lineCounter < 2) { //lineCounter counts how many lines we've gone through!
+//             // we want the scroller to stop after two lines 
+//             //console.log(lineCounter);
+//             lineCounter += 1;
+//             y += system_spacing;
+//             x = initial_x;
+//             x += speed / speedConverter;
+//             context.fillRect(x,y,w,h);
+//         }
+//         else if (x > W - 300 && lineCounter === 2) {
+//             console.log('timeout cleared');
+//             return undefined;  
+//         }
+//         var timeoutID = window.setTimeout(function(){scrollAcross.draw(speed, context, initial_x, initial_y, system_spacing, beatsPerFirst, beatsPerSecond, callInterval)}, callInterval);
+//     }
+// }
+
+// $('#button-1').click(function() {
+//     var beatsPerExample1 = getBeats[0];
+//     var beatsPerExample2 = getBeats[1];
+//     var x = 100; 
+//     var y = 50;
+//     var w = 10;
+//     var h = 120;
+//     //lineCounter = 1;
+//     var speed = Number($('.slider-speed').val());
+//     if (speed === undefined || speed === 0) {
+//         speed = 80;
+//     }
+//     //check if there's music on the canvas before scrolling!
+//     //if (!isCanvasBlank(canvas)) {
+//     var timeout = setTimeout(function (){scrollAcross.draw(speed, ctx, x, y, 200, beatsPerExample1, beatsPerExample2, 20)}, 2000);
+    
+//     //}
+    
+
+// });
+
+// function start(context) { //why does this function get called when clicking the level 1 button??
+//     console.log('function called');
+//     x = initial_x; 
+//     y = initial_y;
+//     w = 10;
+//     h = 120;
+//     lineCounter = 1;
+//     var speed = Number($('.slider-speed').val());
+//     if (speed === undefined || speed === 0) {
+//         speed = 80;
+//     }
+//     //check if there's music on the canvas before scrolling!
+//     //if (!isCanvasBlank(canvas)) {
+//     var timeout = setTimeout(function (){this.drawer(speed, context)}, 3*60/speed*1000 + 400);
+//     var count = 3 //3 beats
+//     $('#timer').text('countdown:  3');
+//     var counter = setInterval(timer, 55*1000/speed);
+//     var clicker = setInterval(sound, 55*1000/speed);
+//     function sound() {
+//         document.getElementById('click').play(); //no jquery??
+//     }
+    
+//     function timer() {
+//         count = count - 1;
+//         if (count <= 0) {
+//            clearInterval(counter);
+//            clearInterval(clicker);
+//            $('#timer').text('start!');
+//            return;
+//         }
+
+//         $('#timer').text('countdown:  ' + String(count)); // watch for spelling
+//     }
+//     sound();
+            
+//     //}
+    
+
+// }
 
 
     
