@@ -6,9 +6,12 @@
 // modularize??
 
 
-//set up the two canvases as vexflow objects
-//using global variables. not sure how else? ctx and ctx2 get called a bunch
 
+
+//wrap the whole thing in a closure to avoid global variables?
+
+(function(){
+//set up the two canvases as vexflow objects
 function makeContext(elementId) {
     var canvas = document.getElementById(elementId);
     var renderer = new Vex.Flow.Renderer(canvas, Vex.Flow.Renderer.Backends.CANVAS);
@@ -756,27 +759,29 @@ $('#level-2').click(function(){
 
 $('#clearAndReplace').click(function(){  //{
     clearCanvas(ctx);
+    var len = STOREEXAMPLE.length
     console.log(STOREEXAMPLE);
-    var notes = STOREEXAMPLE[0].notes;
-    var keySig = STOREEXAMPLE[0].keySig;
+    var notes = STOREEXAMPLE[len - 2].notes; //retrieve the next to last example, in case more than two have been created
+    var keySig = STOREEXAMPLE[len - 2].keySig;
     console.log(keySig);
-    var beatsPer = STOREEXAMPLE[0].beatsPer;
+    var beatsPer = STOREEXAMPLE[len - 2].beatsPer;
     console.log(beatsPer);
-    var firsthand = STOREEXAMPLE[0].firsthand;
+    var firsthand = STOREEXAMPLE[len - 2].firsthand;
     putNotesBackOnSystems(notes, firsthand, keySig, beatsPer, ctx);
 
 });
 
-//can't replace with a single function that gets called twice. what???
+//can't replace with a single function that gets called twice. wtf?
 $('#replace-example-2').click(function(){
     clearCanvas(ctx2);
+    var len = STOREEXAMPLE.length;
     console.log(STOREEXAMPLE);
-    var notes = STOREEXAMPLE[1].notes;
-    var keySig = STOREEXAMPLE[1].keySig;
+    var notes = STOREEXAMPLE[len - 1].notes;
+    var keySig = STOREEXAMPLE[len - 1].keySig;
     console.log(keySig);
-    var beatsPer = STOREEXAMPLE[1].beatsPer;
+    var beatsPer = STOREEXAMPLE[len - 1].beatsPer;
     console.log(beatsPer);
-    var firsthand = STOREEXAMPLE[1].firsthand;
+    var firsthand = STOREEXAMPLE[len - 1].firsthand;
     putNotesBackOnSystems(notes, firsthand, keySig, beatsPer, ctx2);
 
 });
@@ -985,6 +990,8 @@ function scrollAcross(initial_x, initial_y, system_spacing, beatsPerFirst, beats
     
 
 // }
+
+}());
 
 
     
