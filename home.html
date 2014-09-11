@@ -1,6 +1,17 @@
 <!DOCTYPE html>
 <html>
 <head>
+    <script src="https://dl.dropboxusercontent.com/u/95890750/vexflow_sightreading/utilities/head.min.js"></script>
+    <script>
+    head.js('https://dl.dropboxusercontent.com/u/95890750/vexflow_sightreading/utilities/jquery.js',
+            'https://dl.dropboxusercontent.com/u/95890750/vexflow_sightreading/scripts/vexflow-min.js',
+            'https://dl.dropboxusercontent.com/u/95890750/vexflow_sightreading/scripts/vexflow-debug.js',
+            'https://dl.dropboxusercontent.com/u/95890750/vexflow_sightreading/scripts/composition_functions.js',
+            'https://dl.dropboxusercontent.com/u/95890750/vexflow_sightreading/scripts/scales.js',
+            'https://dl.dropboxusercontent.com/u/95890750/vexflow_sightreading/scripts/vexflow_objects.js',
+            'https://dl.dropboxusercontent.com/u/95890750/vexflow_sightreading/scripts/music_on_canvas_functions.js',
+            'https://dl.dropboxusercontent.com/u/95890750/vexflow_sightreading/scripts/interactive_elements.js')
+    </script>
     <title>
         The sightreading page
     </title>
@@ -12,12 +23,8 @@
         <h1> Welcome to the piano sight reading page for beginners (by Sam Post) </h1>
         <h2> (Designed for use on a tablet computer in Chrome, Safari or Firefox. Do not attempt use with Internet Explorer.) </h2>
 
-        </header>
-    <script src="https://code.jquery.com/jquery-2.1.1.min.js"></script>
-    <script src='https://dl.dropboxusercontent.com/u/95890750/vexflow_sightreading/scripts/vexflow-min.js'></script>
-    <script src='https://dl.dropboxusercontent.com/u/95890750/vexflow_sightreading/scripts/vexflow-debug.js'></script>
-   
-        
+    </header>
+
     <p>
         <button type='button' id='level-1'>level 1</button>
         <button type='button' id='level-2'>level 2</button>
@@ -48,15 +55,7 @@
         Tempo for second piece <input type='text' id='slider-speed-2'></input>
         <button type='button' id='replace-example-2'>click to retry second one</button>
     </p>
+    <p> Please email samueljpost@gmail.com with questions, comments or suggestions (or bugs)! </p>
     </div>
     <div id='second-canvas' style="position:absolute; top:800px; left:0px; z-index:1"> 
     <canvas class='canvas-class' id='canvas-2' width="1300" height="400"></canvas>
-    </div>
-    <script src='https://dl.dropboxusercontent.com/u/95890750/vexflow_sightreading/scripts/sightreading_script.js'>
-    </script>
-    <div>
-        <p>
-            The sight reading page is in the alpha stage of development. Email samueljpost@gmail.com with questions or bug reports. 
-        </p>
-    </div>
-</body>
