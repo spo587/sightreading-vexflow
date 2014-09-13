@@ -44,21 +44,34 @@ function putLineOnStaff(line_multiple_bars, staffSingleLine, hand, major_or_mino
     var bars_rh = staffSingleLine.bars_rh;
     var bars_lh = staffSingleLine.bars_lh;
     var len = bars_rh[0].modifiers.length;
+    var sharp_or_flat_array = bars_rh[0].modifiers[len - 1].accList;
+    if (sharp_or_flat_array.length > 0){
+        var numSharps = sharp_or_flat_array[0].type === '#' ? sharp_or_flat_array.length : undefined;
+        var numFlats = sharp_or_flat_array[0].type === 'b' ? sharp_or_flat_array.length : undefined;
+        var keyHalfStepsFromC = numSharps > -1 ? numSharps * 7 % 12 : numFlats * 5 % 12;
+    }
+    else {
+        var keyHalfStepsFromC = 0;
+    }
+    var voices = []
+    var transposedVoices = []
     //careful here. the keySignature may not be the correct index in the array. find a better way?
-    var numSharps = bars_rh[0].modifiers[len - 1].accList.length;
     //be wary of major vs minor right here
-    var keyHalfStepsFromC = numSharps * 7 % 12;
+    
     for (var i=0; i<bars_rh.length; i+=1) {
-        var voice = createVoice(line_multiple_bars[i], beatsPer, 4);
+        voices.push(createVoice(line_multiple_bars[i], beatsPer, 4));
+
         //for now assuming the voice was created in a major key only
-        transposeVoice(voice, 0, keyHalfStepsFromC, 'M', major_or_minor);
+        transposedVoices.push(transposeVoice(voices[i], 0, keyHalfStepsFromC, 'M', major_or_minor));
+
         if (hand === 'r'){
-            formatVoice(voice, bars_rh[i], context);
+            formatVoice(transposedVoices[i], bars_rh[i], context);
         }
         else if (hand === 'l'){
-            formatVoice(voice, bars_lh[i], context);
+            formatVoice(transposedVoices[i], bars_lh[i], context);
         }
-    }
+    };
+
 
 }
 
@@ -94,11 +107,12 @@ function makeSightreading(numBars, beatsPer, key, level, hand, barsPerLine, dist
     // start in measure 0
     var start = 0;
     var line1 = generateLine(rhythms_r, steps_r, key, first_octave, firstClef, barsPerLine, major_or_minor);
+
     start += numBars;
     var rhythms_l = makeRhythms(numBars, beatsPer);
     var steps_l = makeSteps(rhythms_l, 4, level, 'closed');
     var line2 = generateLine(rhythms_l, steps_l, key, second_octave, secondClef, barsPerLine, major_or_minor);
-    //console.log(line1.concat(line2));
+
     renderBarsMultipleLines(TwoSystems, context);
     putLineOnStaff(line1, TwoSystems[0], first_hand, major_or_minor, context);
     putLineOnStaff(line2, TwoSystems[1], second_hand, major_or_minor, context);
@@ -113,10 +127,10 @@ function makeRandomSightReading(numBars, level, barsPerLine, distance_from_top, 
     var beats = [3, 4];
     var beatsPer = beats[Math.floor(Math.random() * beats.length)];
     if (level == 2) {
-        var major_minor_combos = [[0, 'M'], [0, 'm'], [7, 'M'], [7, 'm'], [2, 'M'], [4,'M'], [9, 'M']];
+        var major_minor_combos = [[0, 'M'], [0, 'm'], [7, 'M'], [7, 'm'], [2, 'M'], [4,'M'], [9, 'M'], [5, 'm'], [5, 'M'], [7, 'm'], [5, 'm'], [3, 'm']];
     }
     else {
-        var major_minor_combos = [[0, 'M'], [0, 'm'], [7, 'M'], [7, 'm']];
+        var major_minor_combos = [[0, 'M'], [0, 'm'], [7, 'M'], [5, 'm'], [5, 'm']];
         
     }
     var major_minor_combo = major_minor_combos[Math.floor(Math.random() * major_minor_combos.length)];
@@ -127,53 +141,4 @@ function makeRandomSightReading(numBars, level, barsPerLine, distance_from_top, 
 }
 
 
-
-//takes the given notes and renders them to the staff, given a key
-// function putNotesBackOnSystems(notes, firsthand, keySig, beatsPer, context) {
-//     var stave = makePianoStaffMultipleLines(keySig, String(beatsPer) + '/4', 4, 2, 10, context);
-//     console.log(stave);
-//     var staveLine = 0;
-//     beatDict = {'h':2, 'q': 1, '1': 4}
-//     // if (startMeasure > 4) {
-//     //     staveLine = 1;
-//     //     startMeasure = startMeasure - 4;
-//     // }
-//     var otherhand = firsthand == 'r' ? 'l' : 'r'
-//     var measureCounter = 0;
-//     notesIndex = 0;
-//     for (var i = 1; i<9; i+=1) {
-//         measureCounter = measureCounter % 4
-//         var currentHand = i < 5 ? firsthand : otherhand;
-//         var staveLine = i < 5 ? 0 : 1;
-//         currentMeasureNotes = [];
-//         currentBeat = 1;
-//         while (currentBeat < beatsPer + 1) {
-//             console.log('adding a note');
-//             currentNote = notes[notesIndex]
-//             currentMeasureNotes.push(currentNote);
-//             notesIndex += 1;
-//             realDuration = beatDict[currentNote.duration];
-//             if (currentNote.dots !== 0) {
-//                 realDuration += realDuration/2;
-//             }
-//             currentBeat += realDuration;
-//             //console.log('now the beat is');
-//             //console.log(currentBeat);
-//         }
-        
-
-//         console.log(currentMeasureNotes);
-//         var voice = createVoice(currentMeasureNotes, beatsPer, 4);
-//         transposeVoice(voice, 0, keySig);
-//         if (currentHand === 'r') {
-//             console.log(staveLine);
-//             formatVoice(voice, stave[staveLine].bars_rh[measureCounter], context);
-//         }
-//         else {
-//             console.log(staveLine);
-//             formatVoice(voice, stave[staveLine].bars_lh[measureCounter], context);
-//         }
-//         measureCounter += 1;
-//     }
-// }
 

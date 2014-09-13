@@ -39,7 +39,7 @@ $('#level-2').click(function(){
     var example1 = makeRandomSightReading(4, 2, 4, 10, ctx);
     var beatsPerExample1 = example1.beatsPer;
     var notes1 = example1.notes
-    console.log(beatsPerExample1);
+    //console.log(beatsPerExample1);
 //makeRandomSightReading(4, 1, 4, 410, ctx);
     var example2 = makeRandomSightReading(4, 2, 4, 10, ctx2)
     var beatsPerExample2 = example2.beatsPer;
@@ -55,14 +55,14 @@ $('#level-2').click(function(){
 $('#clearAndReplace').click(function(){  //{
     clearCanvas(ctx);
     var len = STOREEXAMPLE.length
-    console.log(STOREEXAMPLE);
+    //console.log(STOREEXAMPLE);
     var score = STOREEXAMPLE[len - 2]; //retrieve the next to last example, in case more than two have been created
     var line1 = score.line1
     var line2 = score.line2
     var keySig = score.keySig;
-    console.log(keySig);
+    //console.log(keySig);
     var beatsPer = score.beatsPer;
-    console.log(beatsPer);
+    //console.log(beatsPer);
     var firsthand = score.firsthand;
     var secondhand = firsthand === 'r' ? 'l' : 'r';
     var major_or_minor = score.major_or_minor;
@@ -77,14 +77,21 @@ $('#clearAndReplace').click(function(){  //{
 $('#replace-example-2').click(function(){
     clearCanvas(ctx2);
     var len = STOREEXAMPLE.length;
-    console.log(STOREEXAMPLE);
-    var notes = STOREEXAMPLE[len - 1].notes;
-    var keySig = STOREEXAMPLE[len - 1].keySig;
-    console.log(keySig);
-    var beatsPer = STOREEXAMPLE[len - 1].beatsPer;
-    console.log(beatsPer);
-    var firsthand = STOREEXAMPLE[len - 1].firsthand;
-    putNotesBackOnSystems(notes, firsthand, keySig, beatsPer, ctx2);
+    //console.log(STOREEXAMPLE);
+    var score = STOREEXAMPLE[len - 1];
+    var line1 = score.line1
+    var line2 = score.line2
+    var keySig = score.keySig;
+    //console.log(keySig);
+    var beatsPer = score.beatsPer;
+    //console.log(beatsPer);
+    var firsthand = score.firsthand;
+    var secondhand = firsthand === 'r' ? 'l' : 'r';
+    var major_or_minor = score.major_or_minor;
+    var twoLines = makePianoStaffMultipleLines(keySig, String(beatsPer) + '/' + '4', 4, 2, 10);
+    renderBarsMultipleLines(twoLines, ctx2);
+    putLineOnStaff(line1, twoLines[0], firsthand, major_or_minor, ctx2);
+    putLineOnStaff(line2, twoLines[1], secondhand, major_or_minor, ctx2);
 
 });
 

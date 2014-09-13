@@ -6,12 +6,22 @@ function SharpMajorScale(halfStepsFromC) {
     // above the tonic note
     //all indexed to 0
     var transpose_dict_sharp_from_c = {0: 'C', 1:'C#', 2:'D', 3:'D#', 4:'E', 5:'F', 6:'F#', 7:'G', 8:'G#', 9:'A', 10:'A#', 11:'B'};
+    var transpose_dict_flat_from_c = {0: 'C', 1: 'Db', 2:'D', 3: 'Eb', 4:'E', 5:'F', 6:'Gb', 7:'G', 8: 'Ab', 9: 'A', 10: 'Bb', 11:'B'}
+    var sharps = [0, 2, 4, 6, 7, 9, 11];
+    var flats = [1, 3, 5, 8, 10];
+    if (flats.indexOf(halfStepsFromC) > -1) {
+        var transposeDict = transpose_dict_flat_from_c;
+    }
+    else {
+        var transposeDict = transpose_dict_sharp_from_c;
+    }
     this.steps = {};
-    this.steps = {'0':transpose_dict_sharp_from_c[halfStepsFromC]};
+    this.steps = {'0':transposeDict[halfStepsFromC]};
     var scaleHalfSteps = [0, 2, 4, 5, 7, 9, 11];
     for (var i=1; i<7; i+=1) {
-        this.steps[i] = transpose_dict_sharp_from_c[(scaleHalfSteps[i] + halfStepsFromC) % 12];
+        this.steps[i] = transposeDict[(scaleHalfSteps[i] + halfStepsFromC) % 12];
     }
+    //have to fix below for flat scales
     this.steps_reverse = {};
     for (var prop in this.steps) {
         if (this.steps.hasOwnProperty(prop)) {
@@ -89,18 +99,14 @@ function transposeVoice(voice, oldKey_steps_from_c, newKey_steps_from_c, oldScal
     // converted back to notes
     var oldScale = makeScale(oldKey_steps_from_c, oldScale_major_or_minor);
     var newScale = makeScale(newKey_steps_from_c, newScale_major_or_minor);
-    // if (major_or_minor = 'm') {
-    //     var oldScale = new SharpMinorScale(oldKey_steps_from_c);
-    //     var newScale = new SharpMinorScale(newKey_steps_from_c);
-    // }
-    // else {
-    //      var oldScale = new SharpMajorScale(oldKey_steps_from_c);
-    //      var newScale = new SharpMajorScale(newKey_steps_from_c);
-    // }
+
+    transposedNotes = [];
+    var beatsPer = voice.time.num_beats;
     var notes = voice.tickables;
     for (var i=0; i<notes.length; i+=1) {
         var keyProps = notes[i].keyProps[0]
         var key = keyProps.key;
+
         //but it's complicated
         if (key.length > 1 && key[1] == 'B') {
             //for some reason it records the key in caps, but wants it back in lower-case
@@ -127,7 +133,6 @@ function transposeVoice(voice, oldKey_steps_from_c, newKey_steps_from_c, oldScal
         // var accidental = keyProps.accidental;
 
         var scaleDegree = oldScale.steps_reverse[key];
-        console.log(scaleDegree);
         var octave_old = keyProps.octave;
         
         // need to change the octave, if we 'crossed' a c
@@ -149,10 +154,12 @@ function transposeVoice(voice, oldKey_steps_from_c, newKey_steps_from_c, oldScal
         //need to change ALL the properties of the note that matter??? next line doesn't do it
         //notes[i].keyProps[0].key = newScale.steps[scaleDegree]        
         //yup, have to actually create a whole new note instance. what a bummer. below does the trick
-        // console.log(scaleDegree);
-        // console.log(newScale.steps[scaleDegree]);
-        console.log(newScale.steps[scaleDegree].toLowerCase());
-        notes[i] = createSingleNote(newScale.steps[scaleDegree].toLowerCase(), octave, accidental, duration, notes[i].clef);
+
+        newNote = createSingleNote(newScale.steps[scaleDegree].toLowerCase(), octave, accidental, duration, notes[i].clef);
+
+        transposedNotes.push(newNote);
+
     }
+    return createVoice(transposedNotes, beatsPer, 4);
 
 }

@@ -177,5 +177,8 @@ function generateLine(rhythms_nested, steps_nested, key, octave, clef, major_or_
         
 
     }
+    //this function is creating the line in c major
+    //console.log('first note generate by generate line function');
+    //console.log(notes[0][0].keys[0]);
     return notes;
 }

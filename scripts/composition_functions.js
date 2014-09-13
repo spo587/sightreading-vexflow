@@ -28,7 +28,7 @@ function makeRhythms(numMeasures, beatsPer) {
                 beat += 2;
             }
             else {
-                console.log(randNum);
+                //console.log(randNum);
                 rhythms[measures].push('hd');
                 beat += 3;
             }
@@ -42,7 +42,7 @@ function makeRhythms(numMeasures, beatsPer) {
                 rhythms[measures].push('h');
                 beat += 2;
             }
-            
+
         }
         else {
             rhythms[measures].push('q');
