@@ -1,7 +1,7 @@
 //the next three functions are some very basic composing algorithms based on scale degrees. 
 // nothing exciting here
 function makeRhythms(numMeasures, beatsPer) {
-    // 4/4 or 3/4 time only. quarter notes only on syncopated beats. returns 
+    // 4/4 or 3/4 time only. quarter notes only on non-strong beats. returns 
     //a nested array with the rhythms in each measure as strings, readable to vexflow as vexflow rhythms (ie, kinda cryptic)
     if (beatsPer === undefined) {
         beatsPer = 4;
@@ -38,10 +38,15 @@ function makeRhythms(numMeasures, beatsPer) {
                 rhythms[measures].push('q');
                 beat += 1;
             }
-            else {
+            else { //if randNum < 0.9 {
                 rhythms[measures].push('h');
                 beat += 2;
             }
+            // else {
+            //     rhythms[measures].push('q');
+            //     rhythms[measures].push('qr');
+            //     beat +=2; 
+            // }
 
         }
         else {

@@ -157,6 +157,7 @@ function makeLine(rhythms, scaleDegrees, key, melodyOctave, clef, major_or_minor
         }
         var keyName = cScale.steps[(degree)].slice(0,1);
         var accidental = cScale.steps[(degree)].slice(1);
+        console.log(rhythms[i]);
         var note = createSingleNote(keyName, octave, accidental, rhythms[i], clef, '5');
         notes.push(note);
     }
