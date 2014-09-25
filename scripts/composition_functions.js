@@ -76,6 +76,7 @@ function findLastEntryOf(arr, number) {
 function followInArray(arr, first, later) {
     //checks whether the later number follows instances of the first entry
     var check = findLastEntryOf(arr, first);
+    console.log(check);
     if (check > -1){
         return findLastEntryOf(arr, later) > check;
 
@@ -86,26 +87,60 @@ function followInArray(arr, first, later) {
 
 }
 
+function chooseStepsAway(i, level, notes) {
+    //console.log(i);
+    //console.log(level);
+    //console.log(notes);
+    var possibles = ['0', '1', '2', '3', '4'];
+    lastNote = notes[i - 1];
+    lastNoteIndex = possibles.indexOf(lastNote);
+    var up = Number(notes[i - 1]) < 4 ? stepsAway(level) : 0;
+    var down = Number(notes[i - 1]) > 0 ? -stepsAway(level) : 0;
+    var stay = 0;
+    ///check for repeated notes?? 
+    var choices = arrayUnique([stay, up, down]);
+    var randNumWeighted = Math.pow(Math.random(), 0.4);
+    var change = choices[Math.floor(randNumWeighted * choices.length)];
+    var nextIndex = lastNoteIndex + change;
+    if ([0,1,2,3,4].indexOf(nextIndex) > -1) {
+        var nextNote = possibles[nextIndex];
+        return nextNote;
+    }
+    
+    else {
+        return chooseStepsAway(i, level, notes);
+    }
+}
 
-function makeLineLevel1(rhythms, open_or_closed) {
+
+function makeLineLevel1(rhythms, open_or_closed, level) {
     // return an array of numbers 0 through 4 for scale degrees, that adheres 
     // to a few heuristics. 1) range heuristic: must be for at least 4 fingers
     // 2) scale degree 4 heuristic: must be resolved to scale degree 3 later in sequence
     var numnotes = 0;
+
     for (var i=0; i<rhythms.length; i++) {
         numnotes += rhythms[i].length;    //find out how many total notes there are in rhythms array
     }
+    //console.log(numnotes);
     var notes = ['0'];
     for (var i=1; i<numnotes; i+=1){
-        // if on scaleDegree 0, can only repeat or go up
-        var up = Number(notes[i - 1]) < 4 ? 1 : 0;
-        var down = Number(notes[i - 1]) > 0 ? -1 : 0;
-        var stay = 0;
-        ///check for repeated notes?? 
-        var choices = arrayUnique([stay, up, down]);
-        var randNumWeighted = Math.pow(Math.random(), 0.4);
-        var choice = choices[Math.floor(randNumWeighted * choices.length)];
-        notes.push(String(choice + Number(notes[i - 1])));   
+        // lastNote = notes[i - 1];
+        // lastNoteIndex = possibles.indexOf(lastNote);
+        // var up = Number(notes[i - 1]) < 4 ? stepsAway(level) : 0;
+        // var down = Number(notes[i - 1]) > 0 ? -stepsAway(level) : 0;
+        // var stay = 0;
+        // ///check for repeated notes?? 
+        // var choices = arrayUnique([stay, up, down]);
+        // var randNumWeighted = Math.pow(Math.random(), 0.4);
+        // var change = choices[Math.floor(randNumWeighted * choices.length)];
+        // var nextIndex = lastNoteIndex + change;
+        // if ([0,1,2,3,4].indexOf(nextIndex) > -1) {
+        //     var nextNote = possibles[nextIndex];
+        // }
+        var nextNote = chooseStepsAway(i, level, notes);
+
+        notes.push(nextNote);
     }
     if (open_or_closed === 'closed'){
         notes.reverse();
@@ -114,18 +149,18 @@ function makeLineLevel1(rhythms, open_or_closed) {
         var notes_with_meter = [];
     // put the steps in nested arrays, each inner array for a single measure
         var ind = 0;
-        for (var i=0; i<rhythms.length; i++) {
+        for (var j=0; j<rhythms.length; j++) {
             notes_with_meter.push([]);
-            for (var j=0; j<rhythms[i].length; j++) {
-                notes_with_meter[i].push(notes[j+ind]);
+            for (var k=0; k<rhythms[j].length; k++) {
+                notes_with_meter[j].push(notes[k+ind]);
             }
-            ind += rhythms[i].length;
+            ind += rhythms[j].length;
         }
-        console.log(notes_with_meter);
+        //console.log(notes_with_meter);
         return notes_with_meter;
     }
     else {
-        return makeLineLevel1(rhythms, open_or_closed);
+        return makeLineLevel1(rhythms, open_or_closed, level);
     }
 
 }
@@ -135,9 +170,10 @@ function makeSteps(rhythms_nested, pinkyDegree, level, open_or_closed) {
     // returns a nested array, where each index is a single measure
     // open phrase starts on tonic and ends anywhere
     // closed phrase starts anywhere and ends on tonic
-    if (level === 1){
-        return makeLineLevel1(rhythms_nested, open_or_closed);
-    }
+    //if (level === 1){
+    return makeLineLevel1(rhythms_nested, open_or_closed, level);
+    //}
+    
     var numnotes = 0;
     for (var i=0; i<rhythms_nested.length; i++) {
         numnotes += rhythms_nested[i].length;    //find out how many total notes there are in rhythms array
@@ -286,16 +322,16 @@ function makeRhythms(numMeasures, beatsPer, level) {
 }
 
 function stepsAway(level){
-    if (level == 1){
+    if (level === 1){
         return 1;
     }
-    else if (level == 2){
+    else if (level === 2){
         var possibles = range(2,1);
         return possibles[Math.floor(Math.random() * possibles.length)];
 
     }
-    else if (level == 3) {
-        var possibles = range(4, 1);
+    else if (level === 3) {
+        var possibles = range(3, 1);
         return possibles[Math.floor(Math.random() * possibles.length)];
     }
 }
