@@ -102,14 +102,14 @@ function makeSightreading(numBars, beatsPer, key, level, hand, barsPerLine, dist
     var firstClef = first_hand == 'r' ? 'treble' : 'bass';
     var secondClef = first_hand == 'r' ? 'bass' : 'treble';
     var TwoSystems = makePianoStaffMultipleLines(key, String(beatsPer) + '/' + '4', barsPerLine, 2, distance_from_top, context, major_or_minor);
-    var rhythms_r = makeRhythms(numBars, beatsPer);
+    var rhythms_r = makeRhythms(numBars, beatsPer, level);
     var steps_r = makeSteps(rhythms_r, 4, level, 'open');
     // start in measure 0
     var start = 0;
     var line1 = generateLine(rhythms_r, steps_r, key, first_octave, firstClef, barsPerLine, major_or_minor);
 
     start += numBars;
-    var rhythms_l = makeRhythms(numBars, beatsPer);
+    var rhythms_l = makeRhythms(numBars, beatsPer, level);
     var steps_l = makeSteps(rhythms_l, 4, level, 'closed');
     var line2 = generateLine(rhythms_l, steps_l, key, second_octave, secondClef, barsPerLine, major_or_minor);
 

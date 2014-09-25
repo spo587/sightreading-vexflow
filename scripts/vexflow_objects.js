@@ -91,21 +91,28 @@ function createSingleNote(chroma, octave, accidental, duration, clef, fingering)
         return new Vex.Flow.StringNumber(num).setPosition(pos);
     }
     //fingering not working, below....not sure why
-    if (fingering !== undefined) {
+    if (fingering !== undefined && fingering !== '') {
         //console.log('assigning fingering??');
-        note.addModifier(0, newStringNumber('5', Vex.Flow.Modifier.Position.LEFT));
+        note.addModifier(0, newStringNumber(fingering, Vex.Flow.Modifier.Position.ABOVE));
     }
     //tried adding fingering with text annotation, this shit is currently FUCKED
-    var a = newAnnotation("Text", 1, 1);
-    //console.log(note);
-    var e = new Vex.Flow.StaveNote({ keys: ["c/3"], duration: "q"});
-    e.addAnnotation(0, newAnnotation("Text", 1, 1));
+    // var a = newAnnotation("Text", 1, 1);
+    // //console.log(note);
+    // var e = new Vex.Flow.StaveNote({ keys: ["c/3"], duration: "q"});
+    // e.addAnnotation(0, newAnnotation("Text", 1, 1));
     //note.addAnotation(0, newAnnotation("Text", 1, 1));
     //console.log(note);
     return note;
 }
 
 
+// function makeFingering(fingerNum, pos) {
+//     return new Vex.Flow.StringNumber(fingerNum).setPosition(pos);
+// }
+
+// function addFingering(note, fingerNum){
+//     note.addModifier(0, makeFingering(fingerNum, Vex.Flow.Modifier.Position.ABOVE));
+// }
 
 //more failed attempts at adding fingerings below....need to look through again
 // var b = createSingleNote('c','3','','q','treble');
@@ -138,6 +145,25 @@ function createVoice(notes, numbeats, beat_value) {
 }
 
 
+function getNoteProps(note){
+    //for storing and then adding stuff to the note (like a fingering)
+    // need keyname, octave, accidental, rhythm and clef
+    var keyName = note.keys[0][0];
+    var octave = note.keyProps[0].octave;
+    var accidental = note.keyProps[0].accidental;
+    var rhythm = note.duration;
+    if (note.dots > 0) {
+        rhythm += 'd';
+    }
+    if (octave > 3){
+        var clef = 'treble';
+    }
+    else {
+        var clef = 'bass';
+    }
+    return {keyName: keyName, octave: octave, accidental: accidental, rhythm: rhythm, clef: clef};
+}
+
 function makeLine(rhythms, scaleDegrees, key, melodyOctave, clef, major_or_minor) {
     /// generates a SINGLE BAR of notes for a single hand, and returns the notes to be rendered later
     // make sure arrays have same length
@@ -157,29 +183,35 @@ function makeLine(rhythms, scaleDegrees, key, melodyOctave, clef, major_or_minor
         }
         var keyName = cScale.steps[(degree)].slice(0,1);
         var accidental = cScale.steps[(degree)].slice(1);
-        console.log(rhythms[i]);
-        var note = createSingleNote(keyName, octave, accidental, rhythms[i], clef, '5');
+        var note = createSingleNote(keyName, octave, accidental, rhythms[i], clef);
         notes.push(note);
     }
     return notes
 }
 
-//hmm rename this function? takes already existing rhythms and steps, makes a line from the above 
-// function, and adds it to the given grand piano staff
+function removeFingering(note) {
+    note.modifiers = note.modifiers.slice(0, note.modifiers.length - 1);
+}
+
 function generateLine(rhythms_nested, steps_nested, key, octave, clef, major_or_minor) {
-    // 
-    //stave input is a multiple line piano grand staff. should rename this.
-    // takes the inputs and renders the line to the appropriate staff
+
     var notes = [];
     for (var i=0; i<rhythms_nested.length; i+=1) {
         notes.push([])
         var oneMeasureNotes = makeLine(rhythms_nested[i], steps_nested[i], key, octave, clef, major_or_minor);
         notes[i] = oneMeasureNotes;
-        
-
+    
     }
+    // var note1 = notes[0][0];
+    // noteProps = getNoteProps(note1);
+    // notes[0][0] = createSingleNote(noteProps.keyName, noteProps.octave, noteProps.accidental,
+    // noteProps.rhythm, noteProps.clef, '3');
+    // var note2 = notes[0][1];
+    // noteProps2 = getNoteProps(note2);
+    // notes[0][1] = createSingleNote(noteProps2.keyName, noteProps2.octave, noteProps2.accidental,
+    //     noteProps2.rhythm, noteProps2.clef, '');
+    //removeFingering(notes[0][1]);
     //this function is creating the line in c major
     //console.log('first note generate by generate line function');
-    //console.log(notes[0][0].keys[0]);
     return notes;
 }

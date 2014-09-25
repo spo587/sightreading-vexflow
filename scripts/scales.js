@@ -144,6 +144,18 @@ function transposeVoice(voice, oldKey_steps_from_c, newKey_steps_from_c, oldScal
         else {
             octave = octave_old;   
         }
+        //find the fingering. it's in the modifiers array, but unclear which index, since it's
+        //an array, not a property gah not the smartest set up mohit
+        var modifiers = notes[i].modifiers;
+        var modifiers_len = modifiers.length;
+        var fingering;
+        for (var j=0; j<modifiers_len; j+=1){
+            if (modifiers[j].constructor.name === 'StringNumber'){
+                var fingeringObject = modifiers[j];
+                console.log(fingeringObject);
+                fingering = fingeringObject.string_number;
+            }
+        }
 
         //have to add back in the dot as well, since the duration property doesnt have it
         var duration = notes[i].duration;
@@ -155,7 +167,7 @@ function transposeVoice(voice, oldKey_steps_from_c, newKey_steps_from_c, oldScal
         //notes[i].keyProps[0].key = newScale.steps[scaleDegree]        
         //yup, have to actually create a whole new note instance. what a bummer. below does the trick
 
-        newNote = createSingleNote(newScale.steps[scaleDegree].toLowerCase(), octave, accidental, duration, notes[i].clef);
+        newNote = createSingleNote(newScale.steps[scaleDegree].toLowerCase(), octave, accidental, duration, notes[i].clef, fingering);
 
         transposedNotes.push(newNote);
 
