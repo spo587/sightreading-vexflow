@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <script src="https://dl.dropboxusercontent.com/u/95890750/vexflow_sightreading/utilities/head.min.js"></script>
+    <script>
+    head.js('https://dl.dropboxusercontent.com/u/95890750/vexflow_sightreading/utilities/jquery.js',
+            'https://dl.dropboxusercontent.com/u/95890750/vexflow_sightreading/scripts/vexflow-min.js',
+            'https://dl.dropboxusercontent.com/u/95890750/vexflow_sightreading/scripts/vexflow-debug.js',
+            'https://dl.dropboxusercontent.com/u/95890750/vexflow_sightreading/scripts/composition_functions.js',
+            'https://dl.dropboxusercontent.com/u/95890750/vexflow_sightreading/scripts/scales.js',
+            'https://dl.dropboxusercontent.com/u/95890750/vexflow_sightreading/scripts/vexflow_objects.js',
+            'https://dl.dropboxusercontent.com/u/95890750/vexflow_sightreading/scripts/music_on_canvas_functions.js',
+            'https://dl.dropboxusercontent.com/u/95890750/vexflow_sightreading/scripts/interactive_elements.js')
+    </script>
+    <title>
+        The sightreading page
+    </title>
+    
+</head>
+
+<body>
+    <header>
+        <h1> Welcome to the piano sight reading page for beginners (by Sam Post) </h1>
+        <h2> (Designed for use on a tablet computer in Chrome, Safari or Firefox. Do not attempt use with Internet Explorer.) </h2>
+
+    </header>
+        <p>
+        
+        First, click level 1 or level 2 to generate two new exercises. <br>
+
+
+        Click the start button to use the scrolling feature. There will be a full measure delay (turn up your volume to hear the beats) before the scroller starts going. You can alter the tempo by putting in your own (in beats per minute). The default tempo is 80 beats per minute, if you leave it blank. <br>
+        At any time you can start over the same exercise by clicking the retry button, and no need to refresh the page; just click level 1 or level 2 to generate new exercises.
+    </p>
+    <p>
+        <button type='button' id='level-1'>level 1</button>
+        <button type='button' id='level-2'>level 2</button>
+        Optional: tempo <input type='text' id='slider-speed-1'></input>
+        
+        <button type='button' id='button-1'>Start first piece!</button>
+        <button type= 'button' id='stop-start-over-1'> try first piece again</button>
+        <audio src="https://dl.dropboxusercontent.com/u/95890750/vexflow_sightreading/sounds/10211%5ERVBCLICK.mp3" type='audio/mpeg' id="click" autostart="false"></audio>
+        
+    </p>
+    <p class='timer'> countdown:   </p>
+    <canvas class='canvas-class' id='canvas-1' width="1300" height="400"></canvas>
+            
+                
+    <div id='second-button'>
+    <p>
+        <button type='button' id='button-2'>Start second piece!</button>
+
+        Tempo for second piece <input type='text' id='slider-speed-2'></input>
+        <button type='button' id='stop-start-over-2'>Click to retry second piece</button>
+    </p>
+    <p> Please email samueljpost@gmail.com with questions, comments or suggestions (or bugs)! </p>
+    </div>
+    <p class='timer'> countdown:   </p>
+    <div id='second-canvas' style="position:absolute; top:800px; left:0px; z-index:1"> 
+    <canvas class='canvas-class' id='canvas-2' width="1300" height="400"></canvas>
