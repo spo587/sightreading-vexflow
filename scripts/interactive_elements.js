@@ -36,6 +36,8 @@ function makeTwoExamples(context1, context2, level) {
 $('#level-1').click(function(){makeTwoExamples(ctx, ctx2, 1)});
 
 $('#level-2').click(function(){makeTwoExamples(ctx, ctx2, 2)});
+
+$('#level-3').click(function(){makeTwoExamples(ctx, ctx2, 3)});
     
 function clearAndReplace(context) {
     clearCanvas(context);

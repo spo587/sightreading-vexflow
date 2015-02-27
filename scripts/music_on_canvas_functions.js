@@ -44,7 +44,8 @@ function putLineOnStaff(line_multiple_bars, staffSingleLine, hand, major_or_mino
     var bars_rh = staffSingleLine.bars_rh;
     var bars_lh = staffSingleLine.bars_lh;
     var len = bars_rh[0].modifiers.length;
-    var sharp_or_flat_array = bars_rh[0].modifiers[len - 1].accList;
+    console.log(bars_rh[0].modifiers);
+    var sharp_or_flat_array = bars_rh[0].modifiers[len - 2].accList;
     if (sharp_or_flat_array.length > 0){
         var numSharps = sharp_or_flat_array[0].type === '#' ? sharp_or_flat_array.length : undefined;
         var numFlats = sharp_or_flat_array[0].type === 'b' ? sharp_or_flat_array.length : undefined;
@@ -79,9 +80,11 @@ function putLineOnStaff(line_multiple_bars, staffSingleLine, hand, major_or_mino
 function formatVoice(voice, stave, context) {
     //render a non-transposed voice to the stave
     var beams = Vex.Flow.Beam.applyAndGetBeams(voice);
-    var formatter = new Vex.Flow.Formatter().joinVoices([voice]).
-    formatToStave([voice], stave);
+    var formatter = new Vex.Flow.Formatter().joinVoices([voice]).formatToStave([voice], stave);
     voice.draw(context,stave);
+    for (var i=0; i< beams.length; i+=1){
+        beams[i].setContext(context).draw();
+    }
 }
 
 
@@ -102,15 +105,21 @@ function makeSightreading(numBars, beatsPer, key, level, hand, barsPerLine, dist
     var firstClef = first_hand == 'r' ? 'treble' : 'bass';
     var secondClef = first_hand == 'r' ? 'bass' : 'treble';
     var TwoSystems = makePianoStaffMultipleLines(key, String(beatsPer) + '/' + '4', barsPerLine, 2, distance_from_top, context, major_or_minor);
-    var rhythms_r = makeRhythms(numBars, beatsPer, level);
-    var steps_r = makeSteps(rhythms_r, 4, level, 'open');
+    // var rhythms_r = makeRhythms(numBars, beatsPer, level);
+    // var steps_r = makeSteps(rhythms_r, 4, level, 'open');
+    var r = makeLineRhythmsFirst(beatsPer, numBars, level, 4, 'open');
+    var rhythms_r = r.rhythms;
+    var steps_r = r.melody;
     // start in measure 0
     var start = 0;
     var line1 = generateLine(rhythms_r, steps_r, key, first_octave, firstClef, barsPerLine, major_or_minor);
 
     start += numBars;
-    var rhythms_l = makeRhythms(numBars, beatsPer, level);
-    var steps_l = makeSteps(rhythms_l, 4, level, 'closed');
+    // var rhythms_l = makeRhythms(numBars, beatsPer, level);
+    // var steps_l = makeSteps(rhythms_l, 4, level, 'closed');
+    var l = makeLineRhythmsFirst(beatsPer, numBars, level, 4, 'closed');
+    var rhythms_l = l.rhythms;
+    var steps_l = l.melody;
     var line2 = generateLine(rhythms_l, steps_l, key, second_octave, secondClef, barsPerLine, major_or_minor);
 
     renderBarsMultipleLines(TwoSystems, context);

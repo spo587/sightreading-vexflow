@@ -4,7 +4,7 @@
 function makeBars(numBars, height, width) {
     /// make a bunch of bar instances for vex flow
     var bars = [new Vex.Flow.Stave(25, height, width + 50)];
-    for (var i=1; i<numBars; i+=1) {
+    for (var i=1; i < numBars; i += 1) {
         var last_added_bar = bars[bars.length - 1];
         var newBar = new Vex.Flow.Stave(last_added_bar.width + last_added_bar.x, last_added_bar.y, width);
         //newBar.setEndBarType(Vex.Flow.Barline.type.SINGLE);
@@ -21,25 +21,16 @@ function makePianoStaffSingleLine(numBars, key, timeSig, width, height) {
     var bars_rh = makeBars(numBars, height, width);
     //var add_to_rh = makeBars(numBars - 1, height, width);
     var bars_lh = makeBars(numBars, height + 80, width);
-    // var add_to_lh = makeBars(numBars - 1, height + 80, width);
-    // for (var i=0; i<add_to_lh.length; i+= 1) {
-    //     bars_rh.push(add_to_rh[i]);
-    //     bars_lh.push(add_to_lh[i]);
-    // }
+
     bars_rh[0].addClef('treble');
-    bars_rh[0].addTimeSignature(timeSig);
-    var keySig = new SharpMajorScale(key).tonic;
-    // if (major_or_minor === 'm') {
-    //     var keySig = new SharpMinorScale(key).tonic + 'm';
-    // }
-    // else {
-    //     var keySig = new SharpMajorScale(key).tonic;
-    // }
-    bars_rh[0].addKeySignature(keySig);
     
+    var keySig = new SharpMajorScale(key).tonic;
+
+    bars_rh[0].addKeySignature(keySig);
+    bars_rh[0].addTimeSignature(timeSig);
     bars_lh[0].addClef('bass');
-    bars_lh[0].addTimeSignature(timeSig);
     bars_lh[0].addKeySignature(keySig);
+    bars_lh[0].addTimeSignature(timeSig);
     //bars_lh[1].x += numSharps * 25; //  make first bar wider for sharps
     return {bars_rh: bars_rh, bars_lh: bars_lh, timeSig: timeSig};
 }
@@ -84,51 +75,28 @@ function createSingleNote(chroma, octave, accidental, duration, clef, fingering)
         note.addAccidental(0, new Vex.Flow.Accidental(accidental));
     }
     // dotted notes, need to chain
-    if (duration[duration.length-1] === 'd') {
+    if (duration[duration.length - 1] === 'd') {
         note.addDotToAll();
     }
-    function newStringNumber(num, pos) {
-        return new Vex.Flow.StringNumber(num).setPosition(pos);
-    }
-    //fingering not working, below....not sure why
+
     if (fingering !== undefined && fingering !== '') {
-        //console.log('assigning fingering??');
+        console.log('assigning fingering??');
+        console.log(fingering);
+        //debugger;
         note.addModifier(0, newStringNumber(fingering, Vex.Flow.Modifier.Position.ABOVE));
     }
-    //tried adding fingering with text annotation, this shit is currently FUCKED
-    // var a = newAnnotation("Text", 1, 1);
-    // //console.log(note);
-    // var e = new Vex.Flow.StaveNote({ keys: ["c/3"], duration: "q"});
-    // e.addAnnotation(0, newAnnotation("Text", 1, 1));
-    //note.addAnotation(0, newAnnotation("Text", 1, 1));
-    //console.log(note);
     return note;
 }
 
+function newStringNumber(num, pos) {
+        return new Vex.Flow.StringNumber(num).setPosition(pos);
+    }
 
-// function makeFingering(fingerNum, pos) {
-//     return new Vex.Flow.StringNumber(fingerNum).setPosition(pos);
-// }
+function addFingering(note, fingering){
+    console.log('addfingering function being executed');
+    note.addModifier(0, newStringNumber(fingering, Vex.Flow.Modifier.Position.ABOVE))
+}
 
-// function addFingering(note, fingerNum){
-//     note.addModifier(0, makeFingering(fingerNum, Vex.Flow.Modifier.Position.ABOVE));
-// }
-
-//more failed attempts at adding fingerings below....need to look through again
-// var b = createSingleNote('c','3','','q','treble');
-// b.addAnnotation(0, newAnnotation("Text", 1, 1));
-// // for (var prop in a) {
-// //     //  console.log(prop);
-// //     if (a.prop === e.prop) {
-// //         console.log('huzzah')
-// //     }
-// //     else {
-// //         console.log(a.prop);
-// //         console.log(e.prop)
-// //     };
-// // };
-
-// // a.addAnotation(0, newAnnotation("Text", 1, 1));
 
 
 
@@ -184,6 +152,8 @@ function makeLine(rhythms, scaleDegrees, key, melodyOctave, clef, major_or_minor
         var keyName = cScale.steps[(degree)].slice(0,1);
         var accidental = cScale.steps[(degree)].slice(1);
         var note = createSingleNote(keyName, octave, accidental, rhythms[i], clef);
+        //debugger;
+        //console.log(note);
         notes.push(note);
     }
     return notes
@@ -194,6 +164,7 @@ function removeFingering(note) {
 }
 
 function generateLine(rhythms_nested, steps_nested, key, octave, clef, major_or_minor) {
+    ///returns multiple bars?
 
     var notes = [];
     for (var i=0; i<rhythms_nested.length; i+=1) {
@@ -202,16 +173,49 @@ function generateLine(rhythms_nested, steps_nested, key, octave, clef, major_or_
         notes[i] = oneMeasureNotes;
     
     }
-    // var note1 = notes[0][0];
-    // noteProps = getNoteProps(note1);
-    // notes[0][0] = createSingleNote(noteProps.keyName, noteProps.octave, noteProps.accidental,
-    // noteProps.rhythm, noteProps.clef, '3');
+    var fingerConverter_rh = {0: '1', 1: '2', 2: '3', 3: '4', 4:'5'};
+    var fingerConverter_lh = {0: '5', 1:'4', 2: '3', 3:'2', 4:'1'};
+    var note1 = notes[0][0];
+    var note2 = notes[0][1]
+    var step1 = steps_nested[0][0];
+    var step2 = steps_nested[0][1];
+    if (clef === 'treble'){
+        var fingering = fingerConverter_rh[step1];
+        var fingering2 = fingerConverter_rh[step2];
+    }
+    else {
+        var fingering = fingerConverter_lh[step1];
+        var fingering2 = fingerConverter_lh[step2];
+    }
+    console.log(note1);
+    console.log(note1.modifiers);
+    addFingering(note1,fingering);
+    //addFingering(note2,fingering2);
+    //console.log(note1);
+    // console.log(note2);
+
+    // measure1_length = notes[0].length;
+    // for (var i=1; i<measure1_length; i+=1){
+    //     var newnote = notes[0][i];
+    //     addFingering(newnote,'2');
+    //     removeFingering(newnote);
+    //     console.log(newnote.modifiers);
+    // }
+
+
     // var note2 = notes[0][1];
-    // noteProps2 = getNoteProps(note2);
+    // addFingering(note2,'3');
+    // var noteProps = getNoteProps(note1);
+    // console.log(noteProps);
+    //notes[0][0] = createSingleNote(noteProps.keyName, noteProps.octave, noteProps.accidental,
+    //noteProps.rhythm, noteProps.clef, '3');
+    // var note2 = notes[0][1];
+    // var noteProps2 = getNoteProps(note2);
     // notes[0][1] = createSingleNote(noteProps2.keyName, noteProps2.octave, noteProps2.accidental,
     //     noteProps2.rhythm, noteProps2.clef, '');
-    //removeFingering(notes[0][1]);
-    //this function is creating the line in c major
-    //console.log('first note generate by generate line function');
+    // removeFingering(notes[0][1]);
+    // //this function is creating the line in c major
+    // console.log('first note generate by generate line function');
+    console.log(notes)
     return notes;
 }

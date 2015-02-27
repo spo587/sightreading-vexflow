@@ -148,7 +148,7 @@ function transposeVoice(voice, oldKey_steps_from_c, newKey_steps_from_c, oldScal
         //an array, not a property gah not the smartest set up mohit
         var modifiers = notes[i].modifiers;
         var modifiers_len = modifiers.length;
-        var fingering;
+        var fingering = '';
         for (var j=0; j<modifiers_len; j+=1){
             if (modifiers[j].constructor.name === 'StringNumber'){
                 var fingeringObject = modifiers[j];
