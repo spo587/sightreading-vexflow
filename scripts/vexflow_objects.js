@@ -1,5 +1,7 @@
 //now the functions that make vexflow objects
 
+//todo: octaves and five finger positions
+
 //makeBars returns vexflow Stave objects
 function makeBars(numBars, height, width) {
     /// make a bunch of bar instances for vex flow
@@ -99,7 +101,6 @@ function addFingering(note, fingering){
 
 
 
-
 // the notes in a measure are organized into voices. this function adds the notes to a single measure voice object
 function createVoice(notes, numbeats, beat_value) {
     // take the notes and return a voice instance. only good for a single bar
@@ -139,83 +140,74 @@ function makeLine(rhythms, scaleDegrees, key, melodyOctave, clef, major_or_minor
     var notes = [];
     var cScale = new SharpMajorScale(0);    
     var scale = makeScale(key, major_or_minor);
-    for (var i=0; i<rhythms.length; i+=1) {
-        //for melodies that dip below tonic, scale degree negative, make it positive again and change the octave
-        if (scaleDegrees[i].slice(0,2) < 0) {
+    var notesAlmost = scaleDegrees.map(function(scaleDegree){
+        return getNoteProperties(scaleDegree, melodyOctave, clef)
+    });
+    function getNoteProperties(scaleDegree, melodyOctave, clef){
+        if (scaleDegree.slice(0, 2) < 0){
             var octave = melodyOctave - 1;
-            var degree = String(Number(scaleDegrees[i].slice(0,2)) + 7) + scaleDegrees[i].slice(2)
+            var degree = String(Number(scaleDegree.slice(0,2)) + 7) + scaleDegree.slice(2)
         }
         else {
             var octave = melodyOctave;
-            var degree = scaleDegrees[i];
+            var degree = scaleDegree;
         }
         var keyName = cScale.steps[(degree)].slice(0,1);
-        var accidental = cScale.steps[(degree)].slice(1);
-        var note = createSingleNote(keyName, octave, accidental, rhythms[i], clef);
-        //debugger;
-        //console.log(note);
-        notes.push(note);
+        var accidental = cScale.steps[(degree)].slice(1);        
+        return {keyName: keyName, octave: octave, accidental: accidental, clef: clef};
     }
-    return notes
+    //must be a better way to do this!!!
+    var index = -1
+    var notes = notesAlmost.map(function(note){
+        index += 1
+        return createSingleNote(note.keyName, note.octave, note.accidental, rhythms[index], note.clef)
+    });
+    return notes;
 }
+
 
 function removeFingering(note) {
     note.modifiers = note.modifiers.slice(0, note.modifiers.length - 1);
 }
 
-function generateLine(rhythms_nested, steps_nested, key, octave, clef, major_or_minor) {
-    ///returns multiple bars?
 
-    var notes = [];
-    for (var i=0; i<rhythms_nested.length; i+=1) {
-        notes.push([])
-        var oneMeasureNotes = makeLine(rhythms_nested[i], steps_nested[i], key, octave, clef, major_or_minor);
-        notes[i] = oneMeasureNotes;
-    
+function generateLine(rhythms_nested, steps_nested, key, octave, clef, major_or_minor) {
+    ///returns multiple bars
+   
+    var rhythms_steps = combineNestedArrays(rhythms_nested, steps_nested);
+    console.log(rhythms_steps);
+    var notes;
+    notes = rhythms_steps.map(function(elem){  
+        return makeLine(elem[0], elem[1], key, octave, clef, major_or_minor);   
+    });
+
+    addFingeringFirstNoteOfLine(notes, steps_nested, clef);
+    return {notes: notes, steps: steps_nested};
+}
+
+function convert(scaleDegree, highestScaleDegree, clef){
+    ///convert(4, 4, treble) // highest
+    var difference = scaleDegree - highestScaleDegree;
+    if (difference > 0){
+        difference = difference - 6;
     }
-    var fingerConverter_rh = {0: '1', 1: '2', 2: '3', 3: '4', 4:'5'};
-    var fingerConverter_lh = {0: '5', 1:'4', 2: '3', 3:'2', 4:'1'};
-    var note1 = notes[0][0];
-    var note2 = notes[0][1]
+    var ret = {'0': 'highest', '-1': 'secondHighest', '-2': 'thirdLowest', '-3': 'secondLowest', '-4': 'lowest'}
+    return ret[difference];
+}
+
+function addFingeringFirstNoteOfLine(lineMultipleBars, steps_nested, clef, highestScaleDegree){
+    var fingerConverter_rh = {lowest: '1', secondLowest: '2', thirdLowest: '3', secondHighest: '4', highest:'5'};
+    var fingerConverter_lh = {lowest: '5', secondLowest:'4', thirdLowest: '3', secondHighest:'2', highest:'1'};
+    var note1 = lineMultipleBars[0][0];
+    var note2 = lineMultipleBars[0][1];
     var step1 = steps_nested[0][0];
     var step2 = steps_nested[0][1];
     if (clef === 'treble'){
-        var fingering = fingerConverter_rh[step1];
-        var fingering2 = fingerConverter_rh[step2];
+        var fingering = fingerConverter_rh[convert(step1, highestScaleDegree, clef)];
     }
     else {
-        var fingering = fingerConverter_lh[step1];
-        var fingering2 = fingerConverter_lh[step2];
+        var fingering = fingerConverter_lh[convert(step1, highestScaleDegree, clef)];
     }
-    console.log(note1);
-    console.log(note1.modifiers);
-    addFingering(note1,fingering);
-    //addFingering(note2,fingering2);
-    //console.log(note1);
-    // console.log(note2);
-
-    // measure1_length = notes[0].length;
-    // for (var i=1; i<measure1_length; i+=1){
-    //     var newnote = notes[0][i];
-    //     addFingering(newnote,'2');
-    //     removeFingering(newnote);
-    //     console.log(newnote.modifiers);
-    // }
-
-
-    // var note2 = notes[0][1];
-    // addFingering(note2,'3');
-    // var noteProps = getNoteProps(note1);
-    // console.log(noteProps);
-    //notes[0][0] = createSingleNote(noteProps.keyName, noteProps.octave, noteProps.accidental,
-    //noteProps.rhythm, noteProps.clef, '3');
-    // var note2 = notes[0][1];
-    // var noteProps2 = getNoteProps(note2);
-    // notes[0][1] = createSingleNote(noteProps2.keyName, noteProps2.octave, noteProps2.accidental,
-    //     noteProps2.rhythm, noteProps2.clef, '');
-    // removeFingering(notes[0][1]);
-    // //this function is creating the line in c major
-    // console.log('first note generate by generate line function');
-    console.log(notes)
-    return notes;
+    addFingering(note1, fingering);
+    return lineMultipleBars;
 }

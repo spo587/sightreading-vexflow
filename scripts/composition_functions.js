@@ -12,7 +12,18 @@ function makeLineRhythmsFirst(beatsPerMeasure, numMeasures, level, highestScaleD
     var length = findLength(rhythms)
     var melodyNotes = generateMelody(length, level, highestScaleDegree, open_or_closed)
     var melodyNotesNested = nestArray(rhythms, melodyNotes);
-    return {rhythms: rhythms, melody: melodyNotesNested}
+    var rhythmsMelodyTogether = combineArray(rhythms, melodyNotes)
+    return {rhythms: rhythms, melody: melodyNotesNested, together: rhythmsMelodyTogether};
+}
+
+function unNestArray(array){
+    var unnested = [];
+    array.forEach(function(elem, ind, arr){
+        array[ind].forEach(function(innerelem, innerind, innerarr){
+            unnested.push(innerelem)
+        });
+    });
+    return unnested;
 }
 
 function generateRhythms(beatsPerMeasure, numMeasures, level){
@@ -60,6 +71,28 @@ function findLength(nestedArray){
     return total;
 }
 
+function combineNestedArrays(array1, array2){
+    var finalArray = [];
+    for (var i=0; i<array1.length; i+=1){
+        finalArray.push([array1[i], array2[i]])
+    }
+    return finalArray;
+}
+
+function combineArray(array1, array2){
+    //array1 is a nested array, returned from rhythms. array 2 is one dimensional
+    //return a three dimensional array? each innermost array is a rhythm/scale degree pair?
+    var index = -1;
+    var finalArray = array1.map(function(elem){
+        var modified = elem.map(function(innerelem){
+            index += 1;
+            return [innerelem, array2[index]]
+        });
+        return modified;
+    });
+    return finalArray;
+}
+
 function nestArray(array1, array2){
     //array 1 is already nested (array or arrrays), array 2 needs to be nested with each inner array matching
     //the corresponding length of array1
@@ -96,7 +129,7 @@ function generateMelody(length, level, highestScaleDegree, open_or_closed){
 function makeMelodyAnyLevel(lengthLessOne, level, highestScaleDegree, melody){
     //level three only supports normal five finger position yet
     if (melody === undefined){
-        var firstTonic = highestScaleDegree === 4 ? 0 : 4;
+        var firstTonic = highestScaleDegree === 4 ? 0 : 2;
         var melody = {scaleDegrees: [firstTonic], intervals: [], intervalCounts: {step:0, skip:0, leap:0, repeat:0}, fifthDegreePosition: randomIntFromInterval(1,length)}
     }
     if (lengthLessOne === 0){

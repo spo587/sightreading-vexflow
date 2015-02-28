@@ -94,7 +94,7 @@ function formatNotes(notes, stave, context) {
 }
 
 
-function makeSightreading(numBars, beatsPer, key, level, hand, barsPerLine, distance_from_top, context, major_or_minor) {
+function makeSightreading(numBars, beatsPer, key, level, hand, barsPerLine, distance_from_top, context, major_or_minor, highestScaleDegree1, highestScaleDegree2) {
     /// randomly generate a sightreading exercise, generating rhythms and scale steps in a line in each hand separately
     // then transposing to the given key
     //TODO add fingerings!!!
@@ -107,28 +107,30 @@ function makeSightreading(numBars, beatsPer, key, level, hand, barsPerLine, dist
     var TwoSystems = makePianoStaffMultipleLines(key, String(beatsPer) + '/' + '4', barsPerLine, 2, distance_from_top, context, major_or_minor);
     // var rhythms_r = makeRhythms(numBars, beatsPer, level);
     // var steps_r = makeSteps(rhythms_r, 4, level, 'open');
-    var r = makeLineRhythmsFirst(beatsPer, numBars, level, 4, 'open');
+    var r = makeLineRhythmsFirst(beatsPer, numBars, level, highestScaleDegree1, 'open');
     var rhythms_r = r.rhythms;
     var steps_r = r.melody;
     // start in measure 0
     var start = 0;
     var line1 = generateLine(rhythms_r, steps_r, key, first_octave, firstClef, barsPerLine, major_or_minor);
+    addFingeringFirstNoteOfLine(line1.notes, line1.steps, firstClef, highestScaleDegree1);
 
     start += numBars;
     // var rhythms_l = makeRhythms(numBars, beatsPer, level);
     // var steps_l = makeSteps(rhythms_l, 4, level, 'closed');
-    var l = makeLineRhythmsFirst(beatsPer, numBars, level, 4, 'closed');
+    var l = makeLineRhythmsFirst(beatsPer, numBars, level, highestScaleDegree2, 'closed');
     var rhythms_l = l.rhythms;
     var steps_l = l.melody;
     var line2 = generateLine(rhythms_l, steps_l, key, second_octave, secondClef, barsPerLine, major_or_minor);
+    addFingeringFirstNoteOfLine(line2.notes, line2.steps, secondClef, highestScaleDegree2);
 
     renderBarsMultipleLines(TwoSystems, context);
-    putLineOnStaff(line1, TwoSystems[0], first_hand, major_or_minor, context);
-    putLineOnStaff(line2, TwoSystems[1], second_hand, major_or_minor, context);
+    putLineOnStaff(line1.notes, TwoSystems[0], first_hand, major_or_minor, context);
+    putLineOnStaff(line2.notes, TwoSystems[1], second_hand, major_or_minor, context);
     return {firsthand: hand, line1: line1, line2: line2, major_or_minor: major_or_minor};
 }
 
-function makeRandomSightReading(numBars, level, barsPerLine, distance_from_top, context) {
+function makeRandomSightReading(numBars, level, barsPerLine, distance_from_top, context, standardFiveFingerOrNot) {
     // has to be 6 bar length lines for now. fix this!!
     // 8 bars total;
     var first_hand = ['r', 'l'];
@@ -145,7 +147,17 @@ function makeRandomSightReading(numBars, level, barsPerLine, distance_from_top, 
     var major_minor_combo = major_minor_combos[Math.floor(Math.random() * major_minor_combos.length)];
     var key = major_minor_combo[0];
     var major_or_minor = major_minor_combo[1];
-    var score = makeSightreading(numBars, beatsPer, key, level, hand, barsPerLine, distance_from_top, context, major_or_minor);
+    if (standardFiveFingerOrNot === true){
+        var highestScaleDegree1 = 4;
+        var highestScaleDegree2 = 4;
+    }
+    else { 
+        console.log('okay');    
+        var fingerChoices = [3,5];
+        var highestScaleDegree1 = fingerChoices[Math.floor(Math.random() * fingerChoices.length)];
+        var highestScaleDegree2 = fingerChoices[Math.floor(Math.random() * fingerChoices.length)];
+    }
+    var score = makeSightreading(numBars, beatsPer, key, level, hand, barsPerLine, distance_from_top, context, major_or_minor, highestScaleDegree1, highestScaleDegree2);
     return {line1: score.line1, line2: score.line2, firsthand: score.firsthand, beatsPer: beatsPer, keySig: key, major_or_minor: major_or_minor};
 }
 
