@@ -152,7 +152,6 @@ function transposeVoice(voice, oldKey_steps_from_c, newKey_steps_from_c, oldScal
         for (var j=0; j<modifiers_len; j+=1){
             if (modifiers[j].constructor.name === 'StringNumber'){
                 var fingeringObject = modifiers[j];
-                console.log(fingeringObject);
                 fingering = fingeringObject.string_number;
             }
         }

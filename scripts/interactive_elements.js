@@ -17,12 +17,12 @@ var STOREEXAMPLE = []; //oh dear a global variable, not good i know
 var TIMESCALLED = 0;
 
 
-function makeTwoExamples(context1, context2, level) {
+function makeTwoExamples(context1, context2, level, standardFiveFingerOrNot) {
     clearCanvas(context1);
     clearCanvas(context2)
-    var example1 = makeRandomSightReading(4, level, 4, 10, context1, true);
+    var example1 = makeRandomSightReading(4, level, 4, 10, context1, standardFiveFingerOrNot);
     var beatsPerExample1 = example1.beatsPer;
-    var example2 = makeRandomSightReading(4, level, 4, 10, context2, false);
+    var example2 = makeRandomSightReading(4, level, 4, 10, context2, standardFiveFingerOrNot);
     var beatsPerExample2 = example2.beatsPer;
     scrollHandler(100, 50, beatsPerExample1, 200, 20, context1);
     scrollHandler2(100, 50, beatsPerExample2, 200, 20, context2);
@@ -33,13 +33,17 @@ function makeTwoExamples(context1, context2, level) {
 
 } 
 
-$('#level-1').click(function(){makeTwoExamples(ctx, ctx2, 1)});
+$('#level-1').click(function(){makeTwoExamples(ctx, ctx2, 1, true)});
 
-//$('#level-1-non-standard-position').click(function(){makeTwoExamples(ctx, ctx2, 1, 2)})
+$('#level-1-non-standard-position').click(function(){makeTwoExamples(ctx, ctx2, 1, false)})
 
-$('#level-2').click(function(){makeTwoExamples(ctx, ctx2, 2)});
+$('#level-2-non-standard-position').click(function(){makeTwoExamples(ctx, ctx2, 2, false)})
 
-$('#level-3').click(function(){makeTwoExamples(ctx, ctx2, 3)});
+$('#level-3-non-standard-position').click(function(){makeTwoExamples(ctx, ctx2, 3, false)})
+
+$('#level-2').click(function(){makeTwoExamples(ctx, ctx2, 2, true)});
+
+$('#level-3').click(function(){makeTwoExamples(ctx, ctx2, 3, true)});
     
 function clearAndReplace(context) {
     clearCanvas(context);

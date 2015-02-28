@@ -44,7 +44,6 @@ function putLineOnStaff(line_multiple_bars, staffSingleLine, hand, major_or_mino
     var bars_rh = staffSingleLine.bars_rh;
     var bars_lh = staffSingleLine.bars_lh;
     var len = bars_rh[0].modifiers.length;
-    console.log(bars_rh[0].modifiers);
     var sharp_or_flat_array = bars_rh[0].modifiers[len - 2].accList;
     if (sharp_or_flat_array.length > 0){
         var numSharps = sharp_or_flat_array[0].type === '#' ? sharp_or_flat_array.length : undefined;
@@ -137,7 +136,7 @@ function makeRandomSightReading(numBars, level, barsPerLine, distance_from_top, 
     var hand = first_hand[Math.floor(Math.random() * first_hand.length)];
     var beats = [3, 4];
     var beatsPer = beats[Math.floor(Math.random() * beats.length)];
-    if (level == 2) {
+    if (level === 2 || level === 3) {
         var major_minor_combos = [[0, 'M'], [0, 'm'], [7, 'M'], [7, 'm'], [2, 'M'], [4,'M'], [9, 'M'], [5, 'm'], [5, 'M'], [7, 'm'], [5, 'm'], [3, 'm']];
     }
     else {
@@ -147,18 +146,57 @@ function makeRandomSightReading(numBars, level, barsPerLine, distance_from_top, 
     var major_minor_combo = major_minor_combos[Math.floor(Math.random() * major_minor_combos.length)];
     var key = major_minor_combo[0];
     var major_or_minor = major_minor_combo[1];
-    if (standardFiveFingerOrNot === true){
+    if (standardFiveFingerOrNot === false && major_or_minor === 'M'){
+        var highestScaleDegrees = [2, 4];
+        shuffleArray(highestScaleDegrees);
+        var highestScaleDegree1 = highestScaleDegrees[0];
+        var highestScaleDegree2 = highestScaleDegrees[1];
+
+    }
+    else {
         var highestScaleDegree1 = 4;
         var highestScaleDegree2 = 4;
     }
-    else { 
-        console.log('okay');    
-        var fingerChoices = [3,5];
-        var highestScaleDegree1 = fingerChoices[Math.floor(Math.random() * fingerChoices.length)];
-        var highestScaleDegree2 = fingerChoices[Math.floor(Math.random() * fingerChoices.length)];
-    }
+    console.log(major_or_minor);
+    console.log(highestScaleDegree1);
+    console.log(highestScaleDegree2);
     var score = makeSightreading(numBars, beatsPer, key, level, hand, barsPerLine, distance_from_top, context, major_or_minor, highestScaleDegree1, highestScaleDegree2);
     return {line1: score.line1, line2: score.line2, firsthand: score.firsthand, beatsPer: beatsPer, keySig: key, major_or_minor: major_or_minor};
+}
+
+function shuffleArray(array) {
+    for (var i = array.length - 1; i > 0; i--) {
+        var j = Math.floor(Math.random() * (i + 1));
+        var temp = array[i];
+        array[i] = array[j];
+        array[j] = temp;
+    }
+    return array;
+}
+
+function decideHighestFingerChoice(major_minor_combo, level){
+    var major_or_minor = major_minor_combo[1];
+    if (major_or_minor === 'm'){
+        return 4;
+    }
+    else {
+        var fingerChoices = [2,4];
+        var choice = fingerChoices[Math.floor(Math.random() * fingerChoices.length)];
+
+    }
+    if (checkThumbOnSharpSeven(major_minor_combo, choice) === true) {
+        return decideHighestFingerChoice(major_minor_combo, level);
+    }
+    else {
+        return choice;
+    }
+}
+
+function checkThumbOnSharpSeven(key, highestScaleDegree){
+    if (highestScaleDegree === 3){
+        return true;
+    }
+    return false;
 }
 
 

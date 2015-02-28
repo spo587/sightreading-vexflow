@@ -102,8 +102,6 @@ function nestArray(array1, array2){
         lengths.push(array[index].length);
         array2nested.push([]);
     })
-    console.log(lengths);
-    console.log(array2nested);
     var currentIndex = -1;
     for (var i = 0; i < lengths.length; i++){
         for (var j=0; j < lengths[i]; j++){
@@ -114,8 +112,30 @@ function nestArray(array1, array2){
     return array2nested;
 }
 
+function arrayMin(arr){
+    return arr.reduce(function(prev, current){ //highest note
+        return Math.min(prev, current);
+    });
+}
+
+function arrayMax(arr){
+    return arr.reduce(function(prev, current){ //highest note
+        return Math.max(prev, current);
+    });
+}
+
 function generateMelody(length, level, highestScaleDegree, open_or_closed){
     var notes = makeMelodyAnyLevel(length - 1, level, highestScaleDegree).scaleDegrees;
+    //check to make sure the span of the melody is at least a fourth
+    // can i do this in the makemelody function instead? change this later
+    var max = arrayMax(notes);
+    var min = arrayMin(notes);
+    while (max - min < 3){
+        console.log('looping through makemelody again');
+        notes = makeMelodyAnyLevel(length - 1, level, highestScaleDegree).scaleDegrees;
+        max = arrayMax(notes);
+        min = arrayMin(notes);
+    }
     notes.forEach(function(element, index, array){
         array[index] = String(array[index]);
     })
@@ -129,7 +149,8 @@ function generateMelody(length, level, highestScaleDegree, open_or_closed){
 function makeMelodyAnyLevel(lengthLessOne, level, highestScaleDegree, melody){
     //level three only supports normal five finger position yet
     if (melody === undefined){
-        var firstTonic = highestScaleDegree === 4 ? 0 : 2;
+        var firstTonic = highestScaleDegree < 4 ? 0 : 2;
+        console.log(firstTonic);
         var melody = {scaleDegrees: [firstTonic], intervals: [], intervalCounts: {step:0, skip:0, leap:0, repeat:0}, fifthDegreePosition: randomIntFromInterval(1,length)}
     }
     if (lengthLessOne === 0){

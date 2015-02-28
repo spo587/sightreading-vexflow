@@ -82,9 +82,6 @@ function createSingleNote(chroma, octave, accidental, duration, clef, fingering)
     }
 
     if (fingering !== undefined && fingering !== '') {
-        console.log('assigning fingering??');
-        console.log(fingering);
-        //debugger;
         note.addModifier(0, newStringNumber(fingering, Vex.Flow.Modifier.Position.ABOVE));
     }
     return note;
@@ -95,7 +92,6 @@ function newStringNumber(num, pos) {
     }
 
 function addFingering(note, fingering){
-    console.log('addfingering function being executed');
     note.addModifier(0, newStringNumber(fingering, Vex.Flow.Modifier.Position.ABOVE))
 }
 
@@ -175,7 +171,6 @@ function generateLine(rhythms_nested, steps_nested, key, octave, clef, major_or_
     ///returns multiple bars
    
     var rhythms_steps = combineNestedArrays(rhythms_nested, steps_nested);
-    console.log(rhythms_steps);
     var notes;
     notes = rhythms_steps.map(function(elem){  
         return makeLine(elem[0], elem[1], key, octave, clef, major_or_minor);   
