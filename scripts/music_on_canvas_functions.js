@@ -84,7 +84,58 @@ function formatVoice(voice, stave, context) {
     for (var i=0; i< beams.length; i+=1){
         beams[i].setContext(context).draw();
     }
+    
+    // var beams = beamVoiceByBeat(voice, 4, stave);
+    // renderBeams(beams);
 }
+
+
+//work on a new beam function later
+// function beamNotesByBeat(measure_of_notes, beat_duration, stave) {
+//     var total_duration = 0;
+//     var beam_groups = []; //final array of notes, with each entry a group to be beamed
+//     var current_beam_group = []
+//     for (i=0; i<measure_of_notes.length; i += 1) {
+//         total_duration += note_duration(measure_of_notes[i]);
+//         if (total_duration % beat_duration !== 0) { //check if we've landed on a beat
+//             current_beam_group.push(measure_of_notes[i])
+//         }
+//         else {
+//             current_beam_group.push(measure_of_notes[i]); // can't beam single note
+//             if (current_beam_group.length > 1) {
+//                 var beam = new Vex.Flow.Beam(current_beam_group);
+//                 beam_groups.push(beam);
+//                 current_beam_group = [];
+//             };
+//         };
+//     };
+//     Vex.Flow.Formatter.FormatAndDraw(ctx, stave, measure_of_notes);
+//     return beam_groups
+// }
+
+// function beamVoiceByBeat(voice_measure, beat_duration, stave) {
+//   var notes = voice_measure.tickables;
+//   return beamNotesByBeat(notes,beat_duration,stave) 
+
+// }
+
+// function note_duration(note) {
+//   var base_duration =  1/Number(note.duration);
+//     if (note.dots === 0) {
+//       return base_duration;
+//     }
+//     else if (note.dots === 2) {
+//       return base_duration + base_duration/2;
+//     }
+//     else {throw Error('unknown dot error: double dot, maybe?')};
+// };
+
+// function renderBeams(beam_groups) {
+//     for (i=0; i<beam_groups.length; i+=1) {
+//         beam_groups[i].setContext(ctx).draw()
+//     };
+// }
+
 
 
 function formatNotes(notes, stave, context) {
@@ -92,17 +143,49 @@ function formatNotes(notes, stave, context) {
     Vex.Flow.Formatter.FormatAndDraw(context, stave, notes);
 }
 
+function decideOctaves(hand, key){
+    if (key < 6){
+        var right = randomChoiceFromArray([4, 5]);
+        var left = randomChoiceFromArray([2, 3]);
+    }
+    else if (key >= 6){
+        var right = randomChoiceFromArray([4]);
+        var left = randomChoiceFromArray([2, 3]);
+    }
+    if (hand === 'r'){
+        var toRet = [right, left];
+    }
+    else {
+        var toRet = [left, right];
+    }
+    if (left !== right){
+        return toRet;
+    }
+    else {
+        return decideOctaves(hand, key);
+    }
+}
+
+function randomChoiceFromArray(arr){
+    return arr[Math.floor(Math.random() * arr.length)]
+}
 
 function makeSightreading(numBars, beatsPer, key, level, hand, barsPerLine, distance_from_top, context, major_or_minor, highestScaleDegree1, highestScaleDegree2) {
     /// randomly generate a sightreading exercise, generating rhythms and scale steps in a line in each hand separately
     // then transposing to the given key
-    //TODO add fingerings!!!
+    
+
+
     var first_hand = hand;
     var second_hand = hand === 'r' ? 'l' : 'r';
-    var first_octave = first_hand === 'r' ? 4 : 3;
-    var second_octave = first_hand == 'r' ? 3 : 4; 
+     
     var firstClef = first_hand == 'r' ? 'treble' : 'bass';
     var secondClef = first_hand == 'r' ? 'bass' : 'treble';
+
+    var first_octave = decideOctaves(first_hand, key)[0];
+    var second_octave = decideOctaves(second_hand, key)[0];
+
+
     var TwoSystems = makePianoStaffMultipleLines(key, String(beatsPer) + '/' + '4', barsPerLine, 2, distance_from_top, context, major_or_minor);
     // var rhythms_r = makeRhythms(numBars, beatsPer, level);
     // var steps_r = makeSteps(rhythms_r, 4, level, 'open');

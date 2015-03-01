@@ -141,6 +141,7 @@ function generateMelody(length, level, highestScaleDegree, open_or_closed){
     })
 
     if (open_or_closed ===  'closed'){
+        console.log('reversing');
         notes.reverse();
     }
     return notes;
@@ -149,7 +150,7 @@ function generateMelody(length, level, highestScaleDegree, open_or_closed){
 function makeMelodyAnyLevel(lengthLessOne, level, highestScaleDegree, melody){
     //level three only supports normal five finger position yet
     if (melody === undefined){
-        var firstTonic = highestScaleDegree < 4 ? 0 : 2;
+        var firstTonic = highestScaleDegree <= 4 ? 0 : 2;
         console.log(firstTonic);
         var melody = {scaleDegrees: [firstTonic], intervals: [], intervalCounts: {step:0, skip:0, leap:0, repeat:0}, fifthDegreePosition: randomIntFromInterval(1,length)}
     }
