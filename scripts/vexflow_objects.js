@@ -17,7 +17,7 @@ function makeBars(numBars, height, width) {
 }
 
 
-function makePianoStaffMultipleBars(lines, numBarsRemaining, width, initialDistanceFromTop){
+function makePianoStaffMultipleBars(lines, numBarsRemaining, width, initialDistanceFromTop, clefs){
     //could this be recursive? 
     if (numBarsRemaining <= 0){
         return lines;
@@ -26,9 +26,9 @@ function makePianoStaffMultipleBars(lines, numBarsRemaining, width, initialDista
     
     console.log(barsPerLine);
     //rewrite makepianostaff so the width and height parameters come first
-    lines.push(makePianoStaffSingleLine(barsPerLine, width, initialDistanceFromTop)); //add numbarsremaining argument for not going over the number of bars
+    lines.push(makePianoStaffSingleLine(barsPerLine, width, initialDistanceFromTop, clefs)); //add numbarsremaining argument for not going over the number of bars
     initialDistanceFromTop += 200;
-    return makePianoStaffMultipleBars(lines, numBarsRemaining - barsPerLine, width, initialDistanceFromTop)
+    return makePianoStaffMultipleBars(lines, numBarsRemaining - barsPerLine, width, initialDistanceFromTop, clefs)
 }
 
 function findBarsPerLine(barWidth){
@@ -59,29 +59,41 @@ function findBarsPerLine(barWidth){
 
 // makes a piano grand staff and renders it to the page
 //was thinking perhaps to separate out the rendering and the creation of the object. later
-function makePianoStaffSingleLine(numBars, width, height) {
+function makePianoStaffSingleLine(numBars, width, height, clefs) {
+    if (clefs === undefined){
+        var clefs = ['treble', 'bass'];
+    }
     //todo make the first bar bigger
     var bars_rh = makeBars(numBars, height, width);
     //var add_to_rh = makeBars(numBars - 1, height, width);
     var bars_lh = makeBars(numBars, height + 80, width);
 
-    bars_rh[0].addClef('treble');
-    bars_lh[0].addClef('bass');
+    bars_rh[0].addClef(clefs[0]);
+    bars_lh[0].addClef(clefs[1]);
     return {bars_rh: bars_rh, bars_lh: bars_lh};
 }
 
-function addKeyAndTimeSignature(singleLine, key, timeSig){
+function addTimeSignature(singleLine, timeSig){
     //key is halfsteps from c
-    var keySig = new SharpMajorScale(key).tonic;
-
-    singleLine.bars_rh[0].addKeySignature(keySig);
     singleLine.bars_rh[0].addTimeSignature(timeSig);
-    
-    singleLine.bars_lh[0].addKeySignature(keySig);
     singleLine.bars_lh[0].addTimeSignature(timeSig);
     singleLine['timeSig'] = timeSig;
     //bars_lh[1].x += numSharps * 25; //  make first bar wider for sharps
     return singleLine;
+}
+
+function addKeySignature(singleLine, key){
+    var keySig = new SharpMajorScale(key).tonic;
+    singleLine.bars_rh[0].addKeySignature(keySig);
+    singleLine.bars_lh[0].addKeySignature(keySig);
+    return singleLine;
+}
+
+function addKeyAndTimeSignature(multipleLines, timeSig, key){
+    multipleLines.forEach(function(line){
+        addKeySignature(line, key)
+    });
+    addTimeSignature(multipleLines[0], timeSig);
 }
 
 
@@ -96,7 +108,10 @@ function makePianoStaffMultipleLines(key, timeSig, barsPerLine, numLines, distan
     var lines = [];
     for (var i=0; i<numLines; i+=1) {
         var line = makePianoStaffSingleLine(barsPerLine, 900/barsPerLine, distance_from_top)
-        addKeyAndTimeSignature(line, key, timeSig);
+        addKeySignature(line, key);
+        if (i === 0){
+            addTimeSignature(line, timeSig);
+        }
         distance_from_top += 200;
         lines.push(line);
     }
@@ -185,13 +200,13 @@ function getNoteProps(note){
     return {chroma: chroma, octave: octave, accidental: accidental, rhythm: rhythm, clef: clef};
 }
 
-function makeLine(rhythms, scaleDegrees, key, melodyOctave, clef, major_or_minor) {
+function makeLine(rhythms, scaleDegrees, melodyOctave, clef) {
     /// generates a SINGLE BAR of notes for a single hand, and returns the notes to be rendered later
     // make sure arrays have same length
     // key input should be half steps from c
     var notes = [];
     var cScale = new SharpMajorScale(0);    
-    var scale = makeScale(key, major_or_minor);
+    
     var notesAlmost = scaleDegrees.map(function(scaleDegree){
         return getNoteProperties(scaleDegree, melodyOctave, clef)
     });
@@ -223,13 +238,13 @@ function removeFingering(note) {
 }
 
 
-function generateLine(rhythms_nested, steps_nested, key, octave, clef, major_or_minor) {
-    ///returns multiple bars
+function generateLine(rhythms_nested, steps_nested, octave, clef) {
+    ///returns multiple bars. still in c major
    
     var rhythms_steps = combineNestedArrays(rhythms_nested, steps_nested);
     var notes;
     notes = rhythms_steps.map(function(elem){  
-        return makeLine(elem[0], elem[1], key, octave, clef, major_or_minor);   
+        return makeLine(elem[0], elem[1], octave, clef);   
     });
 
     addFingeringFirstNoteOfLine(notes, steps_nested, clef);

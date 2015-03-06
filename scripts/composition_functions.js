@@ -73,7 +73,7 @@ function generateMelody(length, level, highestScaleDegree, open_or_closed){
     var max = arrayMax(notes);
     var min = arrayMin(notes);
     while (max - min < 3){
-        console.log('looping through makemelody again');
+        //console.log('looping through makemelody again');
         notes = makeMelodyAnyLevel(length - 1, level, highestScaleDegree).scaleDegrees;
         max = arrayMax(notes);
         min = arrayMin(notes);
@@ -93,7 +93,7 @@ function makeMelodyAnyLevel(lengthLessOne, level, highestScaleDegree, melody){
     //level three only supports normal five finger position yet
     if (melody === undefined){
         var firstTonic = highestScaleDegree <= 4 ? 0 : 2;
-        console.log(firstTonic);
+        //console.log(firstTonic);
         var melody = {scaleDegrees: [firstTonic], intervals: [], intervalCounts: {step:0, skip:0, leap:0, repeat:0}, fifthDegreePosition: randomIntFromInterval(1,length)}
     }
     if (lengthLessOne === 0){

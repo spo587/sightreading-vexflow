@@ -22,20 +22,28 @@ function renderBars(barsSingleLine, context) {
     var bars_rh = barsSingleLine.bars_rh;
     var bars_lh = barsSingleLine.bars_lh;
     var numBars = bars_rh.length;
-    var connectors = [];
-    bars_rh[0].setContext(context).draw();
-    bars_lh[0].setContext(context).draw();
-    var newConnector = new Vex.Flow.StaveConnector(bars_rh[0], bars_lh[0]);
-    newConnector.setType(Vex.Flow.StaveConnector.type.BRACE).setContext(context).draw();
-    for (var i=1; i<numBars; i+=1) {
-        bars_rh[i].setContext(context).draw();
-        bars_lh[i].setContext(context).draw();
-        var newConnector1 = new Vex.Flow.StaveConnector(bars_rh[i], bars_lh[i]);
-        var newConnector2 = new Vex.Flow.StaveConnector(bars_rh[i], bars_lh[i]);
-        // connectors.push(newConnector);
-        newConnector1.setType(Vex.Flow.StaveConnector.type.SINGLE_LEFT).setContext(context).draw();
-        newConnector2.setType(Vex.Flow.StaveConnector.type.SINGLE_RIGHT).setContext(context).draw();
-    }
+    setFirstBarConnectors(bars_rh[0], bars_lh[0], context);
+    bars_rh.forEach(function(bar, index){
+        addLeftandRightConnector(bar, bars_lh[index], context);
+        bar.setContext(context).draw();
+        bars_lh[index].setContext(context).draw();
+    });
+}
+
+function setFirstBarConnectors(rh_bar, lh_bar, context){
+    var brace = new Vex.Flow.StaveConnector(rh_bar, lh_bar);
+    brace.setType(Vex.Flow.StaveConnector.type.BRACE);
+    brace.setContext(context).draw();
+    
+}
+
+function addLeftandRightConnector(rh_bar, lh_bar, context){
+    var left = new Vex.Flow.StaveConnector(rh_bar, lh_bar);
+    var right = new Vex.Flow.StaveConnector(rh_bar, lh_bar);
+    left.setType(Vex.Flow.StaveConnector.type.SINGLE_LEFT);
+    right.setType(Vex.Flow.StaveConnector.type.SINGLE_RIGHT);
+    left.setContext(context).draw();
+    right.setContext(context).draw();
 }
 
 function renderBarsMultipleLines(lines, context) {
@@ -55,12 +63,12 @@ function transposeVoiceMultipleBars(line_multiple_bars, key, timeSig, major_or_m
 }
 
 
+
+
 function putLineOnStaff2(line_multiple_bars, staffSingleLine, hand, key, timeSig, major_or_minor, context) {
-    var timeSig = staffSingleLine.timeSig;
-    var beatsPer = Number(timeSig[0]);
-    var beat_value = Number(timeSig[2]);
     var bars_rh = staffSingleLine.bars_rh;
     var bars_lh = staffSingleLine.bars_lh;
+    console.log(line_multiple_bars);
     var transposedVoices = transposeVoiceMultipleBars(line_multiple_bars, key, timeSig, major_or_minor)
     if (hand === 'r'){
         transposedVoices.forEach(function(measure, index){
@@ -69,49 +77,44 @@ function putLineOnStaff2(line_multiple_bars, staffSingleLine, hand, key, timeSig
     }
     else if (hand === 'l'){
         transposedVoices.forEach(function(measure, index){
-            formatVoice(measure, bars_rh[index], context);
+            formatVoice(measure, bars_lh[index], context);
         });
     }
 }
 
+function putLineOnStaff(line_multiple_bars, staffMultipleLines, hand, startingBar, key, timeSig, major_or_minor, context){
+    //transpose the voice and put it on the staff
+    var index = 0;
+    transposedVoices = transposeVoiceMultipleBars(line_multiple_bars, key, timeSig, major_or_minor);
+    if (hand === 'r'){
+        transposedVoices.forEach(function(oneMeasureVoice, index){
+            formatVoice(oneMeasureVoice, findCorrectBar(staffMultipleLines, startingBar, index, hand), context);
+            index += 1;
+        });
+    }
+    else if (hand === 'l'){
+        transposedVoices.forEach(function(oneMeasureVoice, index){
+            formatVoice(oneMeasureVoice, findCorrectBar(staffMultipleLines, startingBar, index, hand), context)
+            index += 1;
+        });
+    }
+}
 
+function findCorrectBar(staffMultipleLines, startingBar, index, hand){
+    var barsPerLine = staffMultipleLines[0].bars_rh.length;
+    var line = Math.floor((startingBar + index) / barsPerLine);
+    var barNumberinLine = (startingBar + index) % barsPerLine;
+    if (hand === 'r'){
 
-function putLineOnStaff(line_multiple_bars, staffSingleLine, hand, major_or_minor, context) {
-    var timeSig = staffSingleLine.timeSig;
-    var beatsPer = Number(timeSig[0])
-    var bars_rh = staffSingleLine.bars_rh;
-    var bars_lh = staffSingleLine.bars_lh;
-    var len = bars_rh[0].modifiers.length;
-    var sharp_or_flat_array = bars_rh[0].modifiers[len - 2].accList;
-    if (sharp_or_flat_array.length > 0){
-        var numSharps = sharp_or_flat_array[0].type === '#' ? sharp_or_flat_array.length : undefined;
-        var numFlats = sharp_or_flat_array[0].type === 'b' ? sharp_or_flat_array.length : undefined;
-        var keyHalfStepsFromC = numSharps > -1 ? numSharps * 7 % 12 : numFlats * 5 % 12;
+        return staffMultipleLines[line].bars_rh[barNumberinLine];
     }
     else {
-        var keyHalfStepsFromC = 0;
-    }
-    var voices = []
-    var transposedVoices = []
-    //careful here. the keySignature may not be the correct index in the array. find a better way?
-    //be wary of major vs minor right here
     
-    for (var i=0; i<bars_rh.length; i+=1) {
-        voices.push(createVoice(line_multiple_bars[i], beatsPer, 4));
-
-        //for now assuming the voice was created in a major key only
-        transposedVoices.push(transposeVoice(voices[i], 0, keyHalfStepsFromC, 'M', major_or_minor));
-
-        if (hand === 'r'){
-            formatVoice(transposedVoices[i], bars_rh[i], context);
-        }
-        else if (hand === 'l'){
-            formatVoice(transposedVoices[i], bars_lh[i], context);
-        }
-    };
-
+        return staffMultipleLines[line].bars_lh[barNumberinLine];
+    }
 
 }
+
 
 
 function formatVoice(voice, stave, context) {
@@ -204,8 +207,52 @@ function decideOctaves(hand, key){
     }
 }
 
+function decideOctaves2(){
+    var choices = [2,3,4,5];
+    var first = randomChoiceFromArray(choices);
+    choices.splice(choices.indexOf(first), 1);
+    var second = randomChoiceFromArray(choices);
+    var firstHand = first < second ? 'l' : 'r';
+    var arr = [first, second];
+    arr.firstHand = firstHand;
+    return arr;
+}
+
 function randomChoiceFromArray(arr){
     return arr[Math.floor(Math.random() * arr.length)]
+}
+
+function decideClefs(octaves){
+    return octaves.map(function(octave){
+        return octave <= 3 ? 'bass' : 'treble';
+    });
+}
+
+function makeSightReading(numBarsPerHand, beatsPerMeasure, beatValue, key, level, major_or_minor, highestScaleDegree1, highestScaleDegree2, context){
+    var timeSig = String(beatsPerMeasure) + '/' + String(beatValue);
+    var octaves = decideOctaves2();
+    console.log(octaves);
+    var firstHand = octaves.firstHand;
+    var secondHand = firstHand === 'r' ? 'l' : 'r';
+
+    var clefs = decideClefs(octaves);
+    if (firstHand === 'l'){
+        clefs.reverse();
+    }
+    var emptyBarLines = makePianoStaffMultipleBars([], numBarsPerHand * 2, 250, 10, clefs);
+    addKeyAndTimeSignature(emptyBarLines, timeSig, key);
+    renderBarsMultipleLines(emptyBarLines, ctx);
+    var firstPhrase = makeLineRhythmsFirst(beatsPerMeasure, numBarsPerHand, level, highestScaleDegree1, 'open');
+    var secondPhrase = makeLineRhythmsFirst(beatsPerMeasure, numBarsPerHand, level, highestScaleDegree2, 'closed');
+    var firstPhrase = generateLine(firstPhrase.rhythms, firstPhrase.melody, octaves[0], clefs[0], numBarsPerHand);
+    var secondPhrase = generateLine(secondPhrase.rhythms, secondPhrase.melody, octaves[1], clefs[1], numBarsPerHand);
+    //need to modify fingering function to search for hand, not clef
+    addFingeringFirstNoteOfLine(firstPhrase.notes, firstPhrase.steps, clefs[0], highestScaleDegree1);
+    addFingeringFirstNoteOfLine(secondPhrase.notes, secondPhrase.steps, clefs[1], highestScaleDegree2);
+    //add everything to the page
+    putLineOnStaff(firstPhrase.notes, emptyBarLines, firstHand, 0, key, timeSig, major_or_minor, context);
+    putLineOnStaff(secondPhrase.notes, emptyBarLines, secondHand, numBarsPerHand, key, timeSig, major_or_minor, context);
+    //putLineOnStaff2(firstPhrase.notes, emptyBarLines[0], firstHand, key, timeSig, major_or_minor, context);
 }
 
 function makeSightreading(numBars, beatsPer, key, level, hand, barsPerLine, distance_from_top, context, major_or_minor, highestScaleDegree1, highestScaleDegree2) {
@@ -234,7 +281,7 @@ function makeSightreading(numBars, beatsPer, key, level, hand, barsPerLine, dist
     var steps_r = r.melody;
     // start in measure 0
     var start = 0;
-    var line1 = generateLine(rhythms_r, steps_r, key, first_octave, firstClef, barsPerLine, major_or_minor);
+    var line1 = generateLine(rhythms_r, steps_r, first_octave, firstClef, barsPerLine);
     addFingeringFirstNoteOfLine(line1.notes, line1.steps, firstClef, highestScaleDegree1);
 
     start += numBars;
@@ -243,7 +290,7 @@ function makeSightreading(numBars, beatsPer, key, level, hand, barsPerLine, dist
     var l = makeLineRhythmsFirst(beatsPer, numBars, level, highestScaleDegree2, 'closed');
     var rhythms_l = l.rhythms;
     var steps_l = l.melody;
-    var line2 = generateLine(rhythms_l, steps_l, key, second_octave, secondClef, barsPerLine, major_or_minor);
+    var line2 = generateLine(rhythms_l, steps_l, second_octave, secondClef, barsPerLine);
     addFingeringFirstNoteOfLine(line2.notes, line2.steps, secondClef, highestScaleDegree2);
 
     renderBarsMultipleLines(TwoSystems, context);

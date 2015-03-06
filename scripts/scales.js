@@ -153,7 +153,7 @@ function findChromaAndOctave(note, oldScaleObject, newScaleObject){
     else {
         var octave = octave_old;   
     }
-    console.log(octave);
+    //console.log(octave);
     return {chroma: newScaleObject.steps[scaleDegree].toLowerCase(), octave: octave};   
 }
 
