@@ -16,15 +16,6 @@ function makeLineRhythmsFirst(beatsPerMeasure, numMeasures, level, highestScaleD
     return {rhythms: rhythms, melody: melodyNotesNested, together: rhythmsMelodyTogether};
 }
 
-function unNestArray(array){
-    var unnested = [];
-    array.forEach(function(elem, ind, arr){
-        array[ind].forEach(function(innerelem, innerind, innerarr){
-            unnested.push(innerelem)
-        });
-    });
-    return unnested;
-}
 
 function generateRhythms(beatsPerMeasure, numMeasures, level){
     var rhythms = [];
@@ -61,67 +52,18 @@ function generateNextRhythm(beatsPerMeasure, currentBeat, level){
     }
 }
 
-
-
-function findLength(nestedArray){
-    var total = 0;
-    nestedArray.forEach(function(element, index, array){
-        total += array[index].length
-    })
-    return total;
-}
-
-function combineNestedArrays(array1, array2){
-    var finalArray = [];
-    for (var i=0; i<array1.length; i+=1){
-        finalArray.push([array1[i], array2[i]])
+function nextHierarchicBeat2(beatsPer, currentBeat){
+    //find the time until the next beat one level up in the rhythmic hierarchy
+    //beats are indexed to 0, so a 4/4 measure has beats at 0, 1, 2, 3
+    //for instance on beat 2, the next level a beat 'up' is the next downbeat, 2 beats away
+    //on an eighth note beat, like 0.5 or 1.5 , the next beat is a half note, or 0.5 beats, away.
+    var divider = beatsPer % 3 === 0 ? 3 : 2;
+    if (currentBeat === 0){
+        return beatsPer;
     }
-    return finalArray;
-}
-
-function combineArray(array1, array2){
-    //array1 is a nested array, returned from rhythms. array 2 is one dimensional
-    //return a three dimensional array? each innermost array is a rhythm/scale degree pair?
-    var index = -1;
-    var finalArray = array1.map(function(elem){
-        var modified = elem.map(function(innerelem){
-            index += 1;
-            return [innerelem, array2[index]]
-        });
-        return modified;
-    });
-    return finalArray;
-}
-
-function nestArray(array1, array2){
-    //array 1 is already nested (array or arrrays), array 2 needs to be nested with each inner array matching
-    //the corresponding length of array1
-    var array2nested = [];
-    var lengths = [];
-    array1.forEach(function(element, index, array){
-        lengths.push(array[index].length);
-        array2nested.push([]);
-    })
-    var currentIndex = -1;
-    for (var i = 0; i < lengths.length; i++){
-        for (var j=0; j < lengths[i]; j++){
-            currentIndex += 1
-            array2nested[i].push(array2[currentIndex]);
-        }
+    else {
+        return nextHierarchicBeat2(beatsPer/divider, currentBeat % (beatsPer / divider));
     }
-    return array2nested;
-}
-
-function arrayMin(arr){
-    return arr.reduce(function(prev, current){ //highest note
-        return Math.min(prev, current);
-    });
-}
-
-function arrayMax(arr){
-    return arr.reduce(function(prev, current){ //highest note
-        return Math.max(prev, current);
-    });
 }
 
 function generateMelody(length, level, highestScaleDegree, open_or_closed){
@@ -208,7 +150,6 @@ function makeLineNotesRhythmsTogether(beatsPerMeasure, beatValue, numMeasures, l
 }
 
 
-
 function stepsAway(level){
     if (level == 1){
         return 1;
@@ -219,64 +160,9 @@ function stepsAway(level){
     }
 }
 
-var arrayUnique = function(a) {
-    return a.reduce(function(p, c) {
-        if (p.indexOf(c) < 0) p.push(c);
-        return p;
-    }, []);
-};
-
-function findLastEntryOf(arr, number) {
-    var finalEntry = -1;
-    arr.forEach(function(element, index, array){
-        if (array[index] === number){
-            finalEntry = index
-        }
-    })
-    return finalEntry
-}
-
-function followInArray(arr, first, later) {
-    //checks whether the later number follows instances of the first entry
-    var check = findLastEntryOf(arr, first);
-    if (check > -1){
-        return findLastEntryOf(arr, later) > check;
-    }
-    else {
-        return true;
-    }
-
-}
-
-
-
-function round(num, roundTo) {
-    num = Math.round(num * 1 / roundTo) / (1 / roundTo);
-    return num
-}
-
-
-
-function range(num, increment){
-    var arr = []
-    for (var i = increment; i < num + 0.5; i+= increment){
-        arr.push(i);
-    }
-    return arr;
-}
-
-function rangeBetter(min, length, increment){
-    var arr = []
-    for (var i = 0; i < length; i += increment){
-        arr.push(i + min);
-    }
-    return arr;
-
-}
-
-
 
 function durationToVex(duration, beatsPer) {
+    //convert rhythmic duration returned by generate rhythm function to vexflow-readable format
     var durationToVexDict = {4:'w', 3:'hd', 2:'h', 1:'q', 1.5:'qd', 0.5:'8'};
     if (beatsPer <= 4) {
         return durationToVexDict[duration];
@@ -284,6 +170,7 @@ function durationToVex(duration, beatsPer) {
 }
 
 function vexToDuration(vexNote, beatsPer) {
+    //reverse of the above
     var vexToDurationDict = {'w':4, 'hd':3, 'h': 2, 'q':1, 'qd':1.5, '8':0.5};
     var dot = 0;
     if (vexNote.dots !== 0) {
@@ -292,17 +179,6 @@ function vexToDuration(vexNote, beatsPer) {
     if (beatsPer <= 4) {
         var base = vexToDurationDict[vexNote.duration] 
         return base + dot*base;
-    }
-}
-
-
-function nextHierarchicBeat2(beatsPer, currentBeat){
-    var divider = beatsPer % 3 === 0 ? 3 : 2;
-    if (currentBeat === 0){
-        return beatsPer;
-    }
-    else {
-        return nextHierarchicBeat2(beatsPer/divider, currentBeat%(beatsPer/divider));
     }
 }
 

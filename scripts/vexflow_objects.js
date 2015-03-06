@@ -1,6 +1,7 @@
 //now the functions that make vexflow objects
 
-//todo: octaves and five finger positions
+//todo: try to make it so that it adjusts the number of bars in a line depending on how 
+//wide the screen is?
 
 //makeBars returns vexflow Stave objects
 function makeBars(numBars, height, width) {
@@ -16,26 +17,74 @@ function makeBars(numBars, height, width) {
 }
 
 
+function makePianoStaffMultipleBars(lines, numBarsRemaining, width, initialDistanceFromTop){
+    //could this be recursive? 
+    if (numBarsRemaining <= 0){
+        return lines;
+    }
+    var barsPerLine = findBarsPerLine(width)
+    
+    console.log(barsPerLine);
+    //rewrite makepianostaff so the width and height parameters come first
+    lines.push(makePianoStaffSingleLine(barsPerLine, width, initialDistanceFromTop)); //add numbarsremaining argument for not going over the number of bars
+    initialDistanceFromTop += 200;
+    return makePianoStaffMultipleBars(lines, numBarsRemaining - barsPerLine, width, initialDistanceFromTop)
+}
+
+function findBarsPerLine(barWidth){
+    var windowWidth =  $(window).width();
+    var numbars = 0;
+    windowWidth = windowWidth - barWidth - 75;
+    while (windowWidth > 0){
+        windowWidth = windowWidth - barWidth;
+        numbars += 1;
+    }
+    return numbars;
+}
+
+    
+//     return makePianoStaffMultipleBars(bars, lines, currentBarNumber, numBarsRemaining - 1);
+//     //make staff objects that know how wide the screen is and adjust number of bars in each line accordingly
+//     var barsPerLine = Math.floor(($(window).width()) / 250);
+//     var numLines = Math.floor(numBars / barsPerLine);
+//     var lines = [];
+//     for (var i=0; i<numLines; i+=1){
+//         lines.push(makePianoStaffSingleLine())
+
+//     }
+
+
+
+// }
+
 // makes a piano grand staff and renders it to the page
 //was thinking perhaps to separate out the rendering and the creation of the object. later
-function makePianoStaffSingleLine(numBars, key, timeSig, width, height) {
+function makePianoStaffSingleLine(numBars, width, height) {
     //todo make the first bar bigger
     var bars_rh = makeBars(numBars, height, width);
     //var add_to_rh = makeBars(numBars - 1, height, width);
     var bars_lh = makeBars(numBars, height + 80, width);
 
     bars_rh[0].addClef('treble');
-    
+    bars_lh[0].addClef('bass');
+    return {bars_rh: bars_rh, bars_lh: bars_lh};
+}
+
+function addKeyAndTimeSignature(singleLine, key, timeSig){
+    //key is halfsteps from c
     var keySig = new SharpMajorScale(key).tonic;
 
-    bars_rh[0].addKeySignature(keySig);
-    bars_rh[0].addTimeSignature(timeSig);
-    bars_lh[0].addClef('bass');
-    bars_lh[0].addKeySignature(keySig);
-    bars_lh[0].addTimeSignature(timeSig);
+    singleLine.bars_rh[0].addKeySignature(keySig);
+    singleLine.bars_rh[0].addTimeSignature(timeSig);
+    
+    singleLine.bars_lh[0].addKeySignature(keySig);
+    singleLine.bars_lh[0].addTimeSignature(timeSig);
+    singleLine['timeSig'] = timeSig;
     //bars_lh[1].x += numSharps * 25; //  make first bar wider for sharps
-    return {bars_rh: bars_rh, bars_lh: bars_lh, timeSig: timeSig};
+    return singleLine;
 }
+
+
 
 
 //uses the above function to make multiple lines of piano staff
@@ -46,7 +95,8 @@ function makePianoStaffMultipleLines(key, timeSig, barsPerLine, numLines, distan
     //var distance_from_top = 10;
     var lines = [];
     for (var i=0; i<numLines; i+=1) {
-        var line = makePianoStaffSingleLine(barsPerLine, key, timeSig, 900/barsPerLine, distance_from_top);
+        var line = makePianoStaffSingleLine(barsPerLine, 900/barsPerLine, distance_from_top)
+        addKeyAndTimeSignature(line, key, timeSig);
         distance_from_top += 200;
         lines.push(line);
     }
@@ -64,7 +114,7 @@ function newAnnotation(text, hJustifcation, vJustifcation) {
 function createSingleNote(chroma, octave, accidental, duration, clef, fingering) {
     // create a note instance for vex flow given the inputs
     if (accidental === null) {
-        var accidental = '';
+        accidental = '';
     }
     var durationLength = duration.length;
     if (duration[durationLength - 1] === 'r') { //the note is a rest. set its position in center of staff
@@ -109,24 +159,30 @@ function createVoice(notes, numbeats, beat_value) {
   return voice;
 }
 
+function createTransposedVoice(notes, numbeats, beat_value, key, major_or_minor){
+    var scale = major_or_minor === 'M' ? new SharpMajorScale(key) : new SharpMinorScale(key);
+    return transposeVoice(createVoice(notes, numbeats, beat_value), 0, key, 'M', major_or_minor);
+}
+
 
 function getNoteProps(note){
     //for storing and then adding stuff to the note (like a fingering)
     // need keyname, octave, accidental, rhythm and clef
-    var keyName = note.keys[0][0];
+    var chroma = note.keys[0][0];
     var octave = note.keyProps[0].octave;
     var accidental = note.keyProps[0].accidental;
     var rhythm = note.duration;
     if (note.dots > 0) {
         rhythm += 'd';
     }
+    //octaves are dicey here. fix this
     if (octave > 3){
         var clef = 'treble';
     }
     else {
         var clef = 'bass';
     }
-    return {keyName: keyName, octave: octave, accidental: accidental, rhythm: rhythm, clef: clef};
+    return {chroma: chroma, octave: octave, accidental: accidental, rhythm: rhythm, clef: clef};
 }
 
 function makeLine(rhythms, scaleDegrees, key, melodyOctave, clef, major_or_minor) {
@@ -181,7 +237,7 @@ function generateLine(rhythms_nested, steps_nested, key, octave, clef, major_or_
 }
 
 function convert(scaleDegree, highestScaleDegree, clef){
-    ///convert(4, 4, treble) // highest
+    ///this function is for converting fingerings. see function below. there's definitely a better way to deal with this.
     var difference = scaleDegree - highestScaleDegree;
     if (difference > 0){
         difference = difference - 6;

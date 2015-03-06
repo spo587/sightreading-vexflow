@@ -4,11 +4,17 @@ function makeContext(elementId) {
     var canvas = document.getElementById(elementId);
     var renderer = new Vex.Flow.Renderer(canvas, Vex.Flow.Renderer.Backends.CANVAS);
     var ctx = renderer.getContext();
+    function draw() {
+        ctx.canvas.width  = window.innerWidth;
+        //ctx.canvas.height = window.innerHeight;   
+    }
+    draw();
     return ctx;
 }
 
 var ctx = makeContext('canvas-1');
 var ctx2 = makeContext('canvas-2');
+
 
 
 function renderBars(barsSingleLine, context) {
@@ -37,6 +43,38 @@ function renderBarsMultipleLines(lines, context) {
         renderBars(lines[i], context);
     }
 }
+
+function transposeVoiceMultipleBars(line_multiple_bars, key, timeSig, major_or_minor) {
+    //var timeSig = staffSingleLine.timeSig;
+    var beatsPer = Number(timeSig[0]);
+    var beat_value = Number(timeSig[2]);
+    var transposedVoices = line_multiple_bars.map(function(singleBar){
+        return createTransposedVoice(singleBar, beatsPer, beat_value, key, major_or_minor);
+    });
+    return transposedVoices;
+}
+
+
+function putLineOnStaff2(line_multiple_bars, staffSingleLine, hand, key, timeSig, major_or_minor, context) {
+    var timeSig = staffSingleLine.timeSig;
+    var beatsPer = Number(timeSig[0]);
+    var beat_value = Number(timeSig[2]);
+    var bars_rh = staffSingleLine.bars_rh;
+    var bars_lh = staffSingleLine.bars_lh;
+    var transposedVoices = transposeVoiceMultipleBars(line_multiple_bars, key, timeSig, major_or_minor)
+    if (hand === 'r'){
+        transposedVoices.forEach(function(measure, index){
+            formatVoice(measure, bars_rh[index], context);
+        });
+    }
+    else if (hand === 'l'){
+        transposedVoices.forEach(function(measure, index){
+            formatVoice(measure, bars_rh[index], context);
+        });
+    }
+}
+
+
 
 function putLineOnStaff(line_multiple_bars, staffSingleLine, hand, major_or_minor, context) {
     var timeSig = staffSingleLine.timeSig;
@@ -175,6 +213,8 @@ function makeSightreading(numBars, beatsPer, key, level, hand, barsPerLine, dist
     // then transposing to the given key
     
 
+    //only quarter note beats now. fix this!!!
+    var timeSig = String(beatsPer) + '/' + '4'
 
     var first_hand = hand;
     var second_hand = hand === 'r' ? 'l' : 'r';
@@ -186,7 +226,7 @@ function makeSightreading(numBars, beatsPer, key, level, hand, barsPerLine, dist
     var second_octave = decideOctaves(second_hand, key)[0];
 
 
-    var TwoSystems = makePianoStaffMultipleLines(key, String(beatsPer) + '/' + '4', barsPerLine, 2, distance_from_top, context, major_or_minor);
+    var TwoSystems = makePianoStaffMultipleLines(key, timeSig, barsPerLine, 2, distance_from_top, context, major_or_minor);
     // var rhythms_r = makeRhythms(numBars, beatsPer, level);
     // var steps_r = makeSteps(rhythms_r, 4, level, 'open');
     var r = makeLineRhythmsFirst(beatsPer, numBars, level, highestScaleDegree1, 'open');
@@ -207,8 +247,8 @@ function makeSightreading(numBars, beatsPer, key, level, hand, barsPerLine, dist
     addFingeringFirstNoteOfLine(line2.notes, line2.steps, secondClef, highestScaleDegree2);
 
     renderBarsMultipleLines(TwoSystems, context);
-    putLineOnStaff(line1.notes, TwoSystems[0], first_hand, major_or_minor, context);
-    putLineOnStaff(line2.notes, TwoSystems[1], second_hand, major_or_minor, context);
+    putLineOnStaff2(line1.notes, TwoSystems[0], first_hand, key, timeSig, major_or_minor, context);
+    putLineOnStaff2(line2.notes, TwoSystems[1], second_hand, key, timeSig, major_or_minor, context);
     return {firsthand: hand, line1: line1, line2: line2, major_or_minor: major_or_minor};
 }
 
