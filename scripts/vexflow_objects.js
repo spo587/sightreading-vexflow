@@ -24,7 +24,7 @@ function makePianoStaffMultipleBars(lines, numBarsRemaining, width, initialDista
     }
     var barsPerLine = findBarsPerLine(width)
     
-    console.log(barsPerLine);
+    //console.log(barsPerLine);
     //rewrite makepianostaff so the width and height parameters come first
     lines.push(makePianoStaffSingleLine(barsPerLine, width, initialDistanceFromTop, clefs)); //add numbarsremaining argument for not going over the number of bars
     initialDistanceFromTop += 200;
@@ -84,12 +84,14 @@ function addTimeSignature(singleLine, timeSig){
 
 function addKeySignature(singleLine, key){
     var keySig = new SharpMajorScale(key).tonic;
+    console.log(keySig);
     singleLine.bars_rh[0].addKeySignature(keySig);
     singleLine.bars_lh[0].addKeySignature(keySig);
     return singleLine;
 }
 
 function addKeyAndTimeSignature(multipleLines, timeSig, key){
+    console.log(key);
     multipleLines.forEach(function(line){
         addKeySignature(line, key)
     });
@@ -129,14 +131,15 @@ function newAnnotation(text, hJustifcation, vJustifcation) {
 function createSingleNote(chroma, octave, accidental, duration, clef, fingering) {
     // create a note instance for vex flow given the inputs
     if (accidental === null) {
-        accidental = '';
+        var accidental = '';
     }
     var durationLength = duration.length;
     if (duration[durationLength - 1] === 'r') { //the note is a rest. set its position in center of staff
-        chroma = clef === 'treble' ? 'b' : 'd';
-        octave = clef === 'treble' ? '4' : '3';
+        var chroma = clef === 'treble' ? 'b' : 'd';
+        var octave = clef === 'treble' ? '4' : '3';
     }
-    var note = new Vex.Flow.StaveNote({ keys:[chroma+accidental+'/'+octave], duration: duration, clef:clef, auto_stem: true});
+    //console.log(octave);
+    var note = new Vex.Flow.StaveNote({ keys:[chroma+accidental+'/'+ octave], duration: duration, clef: clef, auto_stem: true});
     //if accidentals, need to chain
     if (accidental !== '') {
         note.addAccidental(0, new Vex.Flow.Accidental(accidental));
@@ -176,6 +179,7 @@ function createVoice(notes, numbeats, beat_value) {
 
 function createTransposedVoice(notes, numbeats, beat_value, key, major_or_minor){
     var scale = major_or_minor === 'M' ? new SharpMajorScale(key) : new SharpMinorScale(key);
+    console.log(key);
     return transposeVoice(createVoice(notes, numbeats, beat_value), 0, key, 'M', major_or_minor);
 }
 
@@ -227,6 +231,8 @@ function makeLine(rhythms, scaleDegrees, melodyOctave, clef) {
     var index = -1
     var notes = notesAlmost.map(function(note){
         index += 1
+        //console.log(note.octave + 1)
+        //console.log(note.clef);
         return createSingleNote(note.keyName, note.octave, note.accidental, rhythms[index], note.clef)
     });
     return notes;
@@ -251,7 +257,7 @@ function generateLine(rhythms_nested, steps_nested, octave, clef) {
     return {notes: notes, steps: steps_nested};
 }
 
-function convert(scaleDegree, highestScaleDegree, clef){
+function convert(scaleDegree, highestScaleDegree){
     ///this function is for converting fingerings. see function below. there's definitely a better way to deal with this.
     var difference = scaleDegree - highestScaleDegree;
     if (difference > 0){
@@ -261,18 +267,18 @@ function convert(scaleDegree, highestScaleDegree, clef){
     return ret[difference];
 }
 
-function addFingeringFirstNoteOfLine(lineMultipleBars, steps_nested, clef, highestScaleDegree){
+function addFingeringFirstNoteOfLine(lineMultipleBars, steps_nested, hand, highestScaleDegree){
     var fingerConverter_rh = {lowest: '1', secondLowest: '2', thirdLowest: '3', secondHighest: '4', highest:'5'};
     var fingerConverter_lh = {lowest: '5', secondLowest:'4', thirdLowest: '3', secondHighest:'2', highest:'1'};
     var note1 = lineMultipleBars[0][0];
     var note2 = lineMultipleBars[0][1];
     var step1 = steps_nested[0][0];
     var step2 = steps_nested[0][1];
-    if (clef === 'treble'){
-        var fingering = fingerConverter_rh[convert(step1, highestScaleDegree, clef)];
+    if (hand === 'r'){
+        var fingering = fingerConverter_rh[convert(step1, highestScaleDegree)];
     }
     else {
-        var fingering = fingerConverter_lh[convert(step1, highestScaleDegree, clef)];
+        var fingering = fingerConverter_lh[convert(step1, highestScaleDegree)];
     }
     addFingering(note1, fingering);
     return lineMultipleBars;

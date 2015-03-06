@@ -17,33 +17,33 @@ var STOREEXAMPLE = []; //oh dear a global variable, not good i know
 var TIMESCALLED = 0;
 
 
-function makeTwoExamples(context1, context2, level, standardFiveFingerOrNot) {
-    clearCanvas(context1);
-    clearCanvas(context2)
-    var example1 = makeRandomSightReading(4, level, 4, 10, context1, standardFiveFingerOrNot);
-    var beatsPerExample1 = example1.beatsPer;
-    var example2 = makeRandomSightReading(4, level, 4, 10, context2, standardFiveFingerOrNot);
-    var beatsPerExample2 = example2.beatsPer;
-    scrollHandler(100, 50, beatsPerExample1, 200, 20, context1);
-    scrollHandler2(100, 50, beatsPerExample2, 200, 20, context2);
-    var ret = [example1, example2];
+function makeExample(context, level, standardFiveFingerOrNot) {
+    clearCanvas(context);
+    //clearCanvas(context2)
+    var example1 = makeRandomSightreading(level, standardFiveFingerOrNot, context);
+    var beatsPerExample1 = example1.beatsPerMeasure;
+    //var example2 = makeRandomSightReading(4, level, 4, 10, context2, standardFiveFingerOrNot);
+    //var beatsPerExample2 = example2.beatsPer;
+    scrollHandler(100, 50, beatsPerExample1, 200, 20, context);
+    //scrollHandler2(100, 50, beatsPerExample2, 200, 20, context2);
+    var ret = [example1] //, example2];
     STOREEXAMPLE = STOREEXAMPLE.concat(ret);
     console.log(STOREEXAMPLE);
     return ret;
 
 } 
 
-$('#level-1').click(function(){makeTwoExamples(ctx, ctx2, 1, true)});
+$('#level-1').click(function(){makeExample(ctx, 1, true)});
 
-$('#level-1-non-standard-position').click(function(){makeTwoExamples(ctx, ctx2, 1, false)})
+$('#level-1-non-standard-position').click(function(){makeExample(ctx, 1, false)})
 
-$('#level-2-non-standard-position').click(function(){makeTwoExamples(ctx, ctx2, 2, false)})
+$('#level-2-non-standard-position').click(function(){makeExample(ctx, 2, false)})
 
-$('#level-3-non-standard-position').click(function(){makeTwoExamples(ctx, ctx2, 3, false)})
+$('#level-3-non-standard-position').click(function(){makeExample(ctx, 3, false)})
 
-$('#level-2').click(function(){makeTwoExamples(ctx, ctx2, 2, true)});
+$('#level-2').click(function(){makeExample(ctx, 2, true)});
 
-$('#level-3').click(function(){makeTwoExamples(ctx, ctx2, 3, true)});
+$('#level-3').click(function(){makeExample(ctx, 3, true)});
     
 function clearAndReplace(context) {
     clearCanvas(context);

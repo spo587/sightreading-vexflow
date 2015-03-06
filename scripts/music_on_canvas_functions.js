@@ -56,6 +56,7 @@ function transposeVoiceMultipleBars(line_multiple_bars, key, timeSig, major_or_m
     //var timeSig = staffSingleLine.timeSig;
     var beatsPer = Number(timeSig[0]);
     var beat_value = Number(timeSig[2]);
+    console.log(key);
     var transposedVoices = line_multiple_bars.map(function(singleBar){
         return createTransposedVoice(singleBar, beatsPer, beat_value, key, major_or_minor);
     });
@@ -85,6 +86,7 @@ function putLineOnStaff2(line_multiple_bars, staffSingleLine, hand, key, timeSig
 function putLineOnStaff(line_multiple_bars, staffMultipleLines, hand, startingBar, key, timeSig, major_or_minor, context){
     //transpose the voice and put it on the staff
     var index = 0;
+    console.log(key);
     transposedVoices = transposeVoiceMultipleBars(line_multiple_bars, key, timeSig, major_or_minor);
     if (hand === 'r'){
         transposedVoices.forEach(function(oneMeasureVoice, index){
@@ -223,10 +225,16 @@ function randomChoiceFromArray(arr){
 }
 
 function decideClefs(octaves){
-    return octaves.map(function(octave){
+    var nonReversed = octaves.map(function(octave){
         return octave <= 3 ? 'bass' : 'treble';
     });
+    var reversed = nonReversed.map(function(elem){
+        return elem === 'treble' ? 'bass' : 'treble'
+    });
+    return {reversed: reversed, nonReversed: nonReversed};
+
 }
+
 
 function makeSightReading(numBarsPerHand, beatsPerMeasure, beatValue, key, level, major_or_minor, highestScaleDegree1, highestScaleDegree2, context){
     var timeSig = String(beatsPerMeasure) + '/' + String(beatValue);
@@ -234,12 +242,15 @@ function makeSightReading(numBarsPerHand, beatsPerMeasure, beatValue, key, level
     console.log(octaves);
     var firstHand = octaves.firstHand;
     var secondHand = firstHand === 'r' ? 'l' : 'r';
-
     var clefs = decideClefs(octaves);
-    if (firstHand === 'l'){
-        clefs.reverse();
-    }
-    var emptyBarLines = makePianoStaffMultipleBars([], numBarsPerHand * 2, 250, 10, clefs);
+    //fix this clefs mess
+
+    console.log(clefs);
+    var reverseClefs = firstHand === 'l' ? clefs.reversed : clefs.nonReversed;
+    var clefs = clefs.nonReversed;
+
+    var emptyBarLines = makePianoStaffMultipleBars([], numBarsPerHand * 2, 250, 10, reverseClefs);
+    console.log(key);
     addKeyAndTimeSignature(emptyBarLines, timeSig, key);
     renderBarsMultipleLines(emptyBarLines, ctx);
     var firstPhrase = makeLineRhythmsFirst(beatsPerMeasure, numBarsPerHand, level, highestScaleDegree1, 'open');
@@ -247,92 +258,61 @@ function makeSightReading(numBarsPerHand, beatsPerMeasure, beatValue, key, level
     var firstPhrase = generateLine(firstPhrase.rhythms, firstPhrase.melody, octaves[0], clefs[0], numBarsPerHand);
     var secondPhrase = generateLine(secondPhrase.rhythms, secondPhrase.melody, octaves[1], clefs[1], numBarsPerHand);
     //need to modify fingering function to search for hand, not clef
-    addFingeringFirstNoteOfLine(firstPhrase.notes, firstPhrase.steps, clefs[0], highestScaleDegree1);
-    addFingeringFirstNoteOfLine(secondPhrase.notes, secondPhrase.steps, clefs[1], highestScaleDegree2);
+    addFingeringFirstNoteOfLine(firstPhrase.notes, firstPhrase.steps, firstHand, highestScaleDegree1);
+    addFingeringFirstNoteOfLine(secondPhrase.notes, secondPhrase.steps, secondHand, highestScaleDegree2);
     //add everything to the page
     putLineOnStaff(firstPhrase.notes, emptyBarLines, firstHand, 0, key, timeSig, major_or_minor, context);
     putLineOnStaff(secondPhrase.notes, emptyBarLines, secondHand, numBarsPerHand, key, timeSig, major_or_minor, context);
     //putLineOnStaff2(firstPhrase.notes, emptyBarLines[0], firstHand, key, timeSig, major_or_minor, context);
+    return {beatsPerMeasure: beatsPerMeasure};
 }
 
-function makeSightreading(numBars, beatsPer, key, level, hand, barsPerLine, distance_from_top, context, major_or_minor, highestScaleDegree1, highestScaleDegree2) {
-    /// randomly generate a sightreading exercise, generating rhythms and scale steps in a line in each hand separately
-    // then transposing to the given key
-    
 
-    //only quarter note beats now. fix this!!!
-    var timeSig = String(beatsPer) + '/' + '4'
-
-    var first_hand = hand;
-    var second_hand = hand === 'r' ? 'l' : 'r';
-     
-    var firstClef = first_hand == 'r' ? 'treble' : 'bass';
-    var secondClef = first_hand == 'r' ? 'bass' : 'treble';
-
-    var first_octave = decideOctaves(first_hand, key)[0];
-    var second_octave = decideOctaves(second_hand, key)[0];
-
-
-    var TwoSystems = makePianoStaffMultipleLines(key, timeSig, barsPerLine, 2, distance_from_top, context, major_or_minor);
-    // var rhythms_r = makeRhythms(numBars, beatsPer, level);
-    // var steps_r = makeSteps(rhythms_r, 4, level, 'open');
-    var r = makeLineRhythmsFirst(beatsPer, numBars, level, highestScaleDegree1, 'open');
-    var rhythms_r = r.rhythms;
-    var steps_r = r.melody;
-    // start in measure 0
-    var start = 0;
-    var line1 = generateLine(rhythms_r, steps_r, first_octave, firstClef, barsPerLine);
-    addFingeringFirstNoteOfLine(line1.notes, line1.steps, firstClef, highestScaleDegree1);
-
-    start += numBars;
-    // var rhythms_l = makeRhythms(numBars, beatsPer, level);
-    // var steps_l = makeSteps(rhythms_l, 4, level, 'closed');
-    var l = makeLineRhythmsFirst(beatsPer, numBars, level, highestScaleDegree2, 'closed');
-    var rhythms_l = l.rhythms;
-    var steps_l = l.melody;
-    var line2 = generateLine(rhythms_l, steps_l, second_octave, secondClef, barsPerLine);
-    addFingeringFirstNoteOfLine(line2.notes, line2.steps, secondClef, highestScaleDegree2);
-
-    renderBarsMultipleLines(TwoSystems, context);
-    putLineOnStaff2(line1.notes, TwoSystems[0], first_hand, key, timeSig, major_or_minor, context);
-    putLineOnStaff2(line2.notes, TwoSystems[1], second_hand, key, timeSig, major_or_minor, context);
-    return {firsthand: hand, line1: line1, line2: line2, major_or_minor: major_or_minor};
+function makeRandomSightreading(level, standardFiveFingerOrNot, context){
+    var numbars = 4;
+    var distance_from_top = 10;
+    var context = ctx;
+    var keyObject = decideKey(level);
+    var timeSig = decideTimeSig(level);
+    var highestScaleDegrees = decideHighFingerChoice(standardFiveFingerOrNot, keyObject);
+    //console.log(highestScaleDegrees);
+    console.log(keyObject.key);
+    return makeSightReading(numbars, timeSig.beatsPerMeasure, timeSig.beatValue, keyObject.key, level, keyObject.major_or_minor, highestScaleDegrees[0], highestScaleDegrees[1], context);
 }
 
-function makeRandomSightReading(numBars, level, barsPerLine, distance_from_top, context, standardFiveFingerOrNot) {
-    // has to be 6 bar length lines for now. fix this!!
-    // 8 bars total;
-    var first_hand = ['r', 'l'];
-    var hand = first_hand[Math.floor(Math.random() * first_hand.length)];
-    var beats = [3, 4];
-    var beatsPer = beats[Math.floor(Math.random() * beats.length)];
-    if (level === 2 || level === 3) {
-        var major_minor_combos = [[0, 'M'], [0, 'm'], [7, 'M'], [7, 'm'], [2, 'M'], [4,'M'], [9, 'M'], [5, 'm'], [5, 'M'], [7, 'm'], [5, 'm'], [3, 'm']];
+function decideHighFingerChoice(standardFiveFingerOrNot, keyObject){
+    if (standardFiveFingerOrNot === true){
+        return [4, 4];
     }
-    else {
+    else if (keyObject.major_or_minor === 'M'){
+        return shuffleArray([4, 2]);
+    }
+    return [4,4];
+}
+
+function decideTimeSig(level){
+    if (level === 1 || level === 2){
+        var beatValue = 4;
+        var beatsPerMeasure = randomChoiceFromArray([3, 4]);
+    }
+    else if (level === 3){
+        var beatValue = 4;
+        var beatsPerMeasure = randomChoiceFromArray([2, 3, 4]);
+    }
+    return {beatsPerMeasure: beatsPerMeasure, beatValue: beatValue};
+}
+function decideKey(level){
+    if (level === 1){
         var major_minor_combos = [[0, 'M'], [0, 'm'], [7, 'M'], [5, 'm'], [5, 'm']];
         
     }
-    var major_minor_combo = major_minor_combos[Math.floor(Math.random() * major_minor_combos.length)];
-    var key = major_minor_combo[0];
-    var major_or_minor = major_minor_combo[1];
-    if (standardFiveFingerOrNot === false && major_or_minor === 'M'){
-        var highestScaleDegrees = [2, 4];
-        shuffleArray(highestScaleDegrees);
-        var highestScaleDegree1 = highestScaleDegrees[0];
-        var highestScaleDegree2 = highestScaleDegrees[1];
-
+    else if (level === 2 || level === 3){
+        var major_minor_combos = [[0, 'M'], [0, 'm'], [7, 'M'], [7, 'm'], [2, 'M'], [4,'M'], [9, 'M'], [5, 'm'], [5, 'M'], [7, 'm'], [5, 'm'], [3, 'm']];
     }
-    else {
-        var highestScaleDegree1 = 4;
-        var highestScaleDegree2 = 4;
-    }
-    console.log(major_or_minor);
-    console.log(highestScaleDegree1);
-    console.log(highestScaleDegree2);
-    var score = makeSightreading(numBars, beatsPer, key, level, hand, barsPerLine, distance_from_top, context, major_or_minor, highestScaleDegree1, highestScaleDegree2);
-    return {line1: score.line1, line2: score.line2, firsthand: score.firsthand, beatsPer: beatsPer, keySig: key, major_or_minor: major_or_minor};
+    var major_minor_combo = randomChoiceFromArray(major_minor_combos);
+    return {key: major_minor_combo[0], major_or_minor: major_minor_combo[1]};
 }
+
 
 function shuffleArray(array) {
     for (var i = array.length - 1; i > 0; i--) {
@@ -344,30 +324,107 @@ function shuffleArray(array) {
     return array;
 }
 
-function decideHighestFingerChoice(major_minor_combo, level){
-    var major_or_minor = major_minor_combo[1];
-    if (major_or_minor === 'm'){
-        return 4;
-    }
-    else {
-        var fingerChoices = [2,4];
-        var choice = fingerChoices[Math.floor(Math.random() * fingerChoices.length)];
+// function decideHighestFingerChoice(major_minor_combo, level){
+//     var major_or_minor = major_minor_combo[1];
+//     if (major_or_minor === 'm'){
+//         return 4;
+//     }
+//     else {
+//         var fingerChoices = [2,4];
+//         var choice = fingerChoices[Math.floor(Math.random() * fingerChoices.length)];
 
-    }
-    if (checkThumbOnSharpSeven(major_minor_combo, choice) === true) {
-        return decideHighestFingerChoice(major_minor_combo, level);
-    }
-    else {
-        return choice;
-    }
-}
+//     }
+//     if (checkThumbOnSharpSeven(major_minor_combo, choice) === true) {
+//         return decideHighestFingerChoice(major_minor_combo, level);
+//     }
+//     else {
+//         return choice;
+//     }
+// }
 
-function checkThumbOnSharpSeven(key, highestScaleDegree){
-    if (highestScaleDegree === 3){
-        return true;
-    }
-    return false;
-}
+// function checkThumbOnSharpSeven(key, highestScaleDegree){
+//     if (highestScaleDegree === 3){
+//         return true;
+//     }
+//     return false;
+// }
+
+// function makeSightreading(numBars, beatsPer, key, level, hand, barsPerLine, distance_from_top, context, major_or_minor, highestScaleDegree1, highestScaleDegree2) {
+//     /// randomly generate a sightreading exercise, generating rhythms and scale steps in a line in each hand separately
+//     // then transposing to the given key
+    
+
+//     //only quarter note beats now. fix this!!!
+//     var timeSig = String(beatsPer) + '/' + '4'
+
+//     var first_hand = hand;
+//     var second_hand = hand === 'r' ? 'l' : 'r';
+     
+//     var firstClef = first_hand == 'r' ? 'treble' : 'bass';
+//     var secondClef = first_hand == 'r' ? 'bass' : 'treble';
+
+//     var first_octave = decideOctaves(first_hand, key)[0];
+//     var second_octave = decideOctaves(second_hand, key)[0];
 
 
+//     var TwoSystems = makePianoStaffMultipleLines(key, timeSig, barsPerLine, 2, distance_from_top, context, major_or_minor);
+//     // var rhythms_r = makeRhythms(numBars, beatsPer, level);
+//     // var steps_r = makeSteps(rhythms_r, 4, level, 'open');
+//     var r = makeLineRhythmsFirst(beatsPer, numBars, level, highestScaleDegree1, 'open');
+//     var rhythms_r = r.rhythms;
+//     var steps_r = r.melody;
+//     // start in measure 0
+//     var start = 0;
+//     var line1 = generateLine(rhythms_r, steps_r, first_octave, firstClef, barsPerLine);
+//     addFingeringFirstNoteOfLine(line1.notes, line1.steps, firstClef, highestScaleDegree1);
+
+//     start += numBars;
+//     // var rhythms_l = makeRhythms(numBars, beatsPer, level);
+//     // var steps_l = makeSteps(rhythms_l, 4, level, 'closed');
+//     var l = makeLineRhythmsFirst(beatsPer, numBars, level, highestScaleDegree2, 'closed');
+//     var rhythms_l = l.rhythms;
+//     var steps_l = l.melody;
+//     var line2 = generateLine(rhythms_l, steps_l, second_octave, secondClef, barsPerLine);
+//     addFingeringFirstNoteOfLine(line2.notes, line2.steps, secondClef, highestScaleDegree2);
+
+//     renderBarsMultipleLines(TwoSystems, context);
+//     putLineOnStaff2(line1.notes, TwoSystems[0], first_hand, key, timeSig, major_or_minor, context);
+//     putLineOnStaff2(line2.notes, TwoSystems[1], second_hand, key, timeSig, major_or_minor, context);
+//     return {firsthand: hand, line1: line1, line2: line2, major_or_minor: major_or_minor};
+// }
+
+// function makeRandomSightReading(numBars, level, barsPerLine, distance_from_top, context, standardFiveFingerOrNot) {
+//     // has to be 6 bar length lines for now. fix this!!
+//     // 8 bars total;
+//     var first_hand = ['r', 'l'];
+//     var hand = first_hand[Math.floor(Math.random() * first_hand.length)];
+//     var beats = [3, 4];
+//     var beatsPer = beats[Math.floor(Math.random() * beats.length)];
+//     if (level === 2 || level === 3) {
+//         var major_minor_combos = [[0, 'M'], [0, 'm'], [7, 'M'], [7, 'm'], [2, 'M'], [4,'M'], [9, 'M'], [5, 'm'], [5, 'M'], [7, 'm'], [5, 'm'], [3, 'm']];
+//     }
+//     else {
+//         var major_minor_combos = [[0, 'M'], [0, 'm'], [7, 'M'], [5, 'm'], [5, 'm']];
+        
+//     }
+//     var major_minor_combo = major_minor_combos[Math.floor(Math.random() * major_minor_combos.length)];
+//     var key = major_minor_combo[0];
+//     var major_or_minor = major_minor_combo[1];
+//     if (standardFiveFingerOrNot === false && major_or_minor === 'M'){
+//         var highestScaleDegrees = [2, 4];
+//         shuffleArray(highestScaleDegrees);
+//         var highestScaleDegree1 = highestScaleDegrees[0];
+//         var highestScaleDegree2 = highestScaleDegrees[1];
+
+//     }
+//     else {
+//         var highestScaleDegree1 = 4;
+//         var highestScaleDegree2 = 4;
+//     }
+//     console.log(major_or_minor);
+//     console.log(highestScaleDegree1);
+//     console.log(highestScaleDegree2);
+//     var score = makeSightreading(numBars, beatsPer, key, level, hand, barsPerLine, distance_from_top, context, major_or_minor, highestScaleDegree1, highestScaleDegree2);
+//     return {line1: score.line1, line2: score.line2, firsthand: score.firsthand, beatsPer: beatsPer, keySig: key, major_or_minor: major_or_minor};
+// }
 
