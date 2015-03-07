@@ -1,3 +1,4 @@
+//todo: fix beams, find key signature bug, and add radio buttons
 
 
 function makeContext(elementId) {
@@ -13,7 +14,7 @@ function makeContext(elementId) {
 }
 
 var ctx = makeContext('canvas-1');
-var ctx2 = makeContext('canvas-2');
+//var ctx2 = makeContext('canvas-2');
 
 
 
@@ -122,64 +123,76 @@ function findCorrectBar(staffMultipleLines, startingBar, index, hand){
 function formatVoice(voice, stave, context) {
     //render a non-transposed voice to the stave
     var beams = Vex.Flow.Beam.applyAndGetBeams(voice);
+    //console.log(voice);
+    //var beams = beamMeasureByBeat(voice);
+    console.log(beams);
     var formatter = new Vex.Flow.Formatter().joinVoices([voice]).formatToStave([voice], stave);
     voice.draw(context,stave);
-    for (var i=0; i< beams.length; i+=1){
-        beams[i].setContext(context).draw();
-    }
-    
-    // var beams = beamVoiceByBeat(voice, 4, stave);
-    // renderBeams(beams);
+    beams.forEach(function(beam){
+        beam.setContext(context).draw();
+    });
 }
 
 
 //work on a new beam function later
-// function beamNotesByBeat(measure_of_notes, beat_duration, stave) {
-//     var total_duration = 0;
-//     var beam_groups = []; //final array of notes, with each entry a group to be beamed
-//     var current_beam_group = []
-//     for (i=0; i<measure_of_notes.length; i += 1) {
-//         total_duration += note_duration(measure_of_notes[i]);
-//         if (total_duration % beat_duration !== 0) { //check if we've landed on a beat
-//             current_beam_group.push(measure_of_notes[i])
-//         }
-//         else {
-//             current_beam_group.push(measure_of_notes[i]); // can't beam single note
-//             if (current_beam_group.length > 1) {
-//                 var beam = new Vex.Flow.Beam(current_beam_group);
-//                 beam_groups.push(beam);
-//                 current_beam_group = [];
-//             };
-//         };
-//     };
-//     Vex.Flow.Formatter.FormatAndDraw(ctx, stave, measure_of_notes);
-//     return beam_groups
-// }
 
-// function beamVoiceByBeat(voice_measure, beat_duration, stave) {
-//   var notes = voice_measure.tickables;
-//   return beamNotesByBeat(notes,beat_duration,stave) 
+function beamMeasureByBeat(voice){
+    var beatsPerMeasure = voice.totalTicks.numerator / 4096;
+    console.log(beatsPerMeasure);
+    var beams = [];
+    for (var i=0; i<beatsPerMeasure; i+=1){
+        var empty = [];
+        console.log(i);
+        var beatNotes = beatOfNotes(empty, voice.tickables, i, 1);
+        console.log(beatNotes);
+        console.log('next line');
+        if (beatNotes.length > 1){
+                console.log('adding beam');
+                beams.push(new Vex.Flow.Beam(beatNotes));
+            }
+        }
+        
+    return beams;
+}
 
-// }
+function beatOfNotes(soFar, voiceNotes, beatStart, beatRemaining){
+    if (beatRemaining === 0){
+        return soFar
+    }
+    else {
+        var note = getNote(voiceNotes, beatStart);
+        if (note){
+            soFar.push(note);
+        }
+        //only deal with 8th notes, for now
+        return beatOfNotes(soFar, voiceNotes, beatStart + 0.5, beatRemaining - 0.5);
 
-// function note_duration(note) {
-//   var base_duration =  1/Number(note.duration);
-//     if (note.dots === 0) {
-//       return base_duration;
-//     }
-//     else if (note.dots === 2) {
-//       return base_duration + base_duration/2;
-//     }
-//     else {throw Error('unknown dot error: double dot, maybe?')};
-// };
+    }
+}
 
-// function renderBeams(beam_groups) {
-//     for (i=0; i<beam_groups.length; i+=1) {
-//         beam_groups[i].setContext(ctx).draw()
-//     };
-// }
+function getNote(notes, beat){
+    if (beat === 0){
+        return notes[0];
+    }
+    else if (beat < 0){
+        return undefined;
+    }
+    else {
+        var move = getDuration(notes[0]);
+        return getNote(notes.slice(1), beat - move);
+    }
+}
 
 
+
+function getDuration(note){
+    //return fractions of a total beat
+    if (note !== undefined){
+        return note.ticks.numerator / 4096;
+    }
+    return 0;
+
+}
 
 function formatNotes(notes, stave, context) {
     /// not using this function right now, but can render notes without a voice if you want
