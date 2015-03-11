@@ -24,7 +24,7 @@ function makeExample(context, level, standardFiveFingerOrNot) {
     var beatsPerExample1 = example1.beatsPerMeasure;
     //var example2 = makeRandomSightReading(4, level, 4, 10, context2, standardFiveFingerOrNot);
     //var beatsPerExample2 = example2.beatsPer;
-    scrollHandler(100, 50, beatsPerExample1, 200, 20, context);
+    scrollHandler(75, 40, beatsPerExample1, 200, 20, context);
     //scrollHandler2(100, 50, beatsPerExample2, 200, 20, context2);
     var ret = [example1] //, example2];
     STOREEXAMPLE = STOREEXAMPLE.concat(ret);
@@ -50,30 +50,38 @@ function clearAndReplace(context) {
     var len = STOREEXAMPLE.length
     //console.log(STOREEXAMPLE);
     if (context.canvas.id === 'canvas-1') {
-        var score = STOREEXAMPLE[len - 2]; //retrieve the next to last example, in case more than two have been created
+        var score = STOREEXAMPLE[len - 1]; //retrieve the next to last example, in case more than two have been created
     }
-    else if (context.canvas.id === 'canvas-2'){
-        var score = STOREEXAMPLE[len - 1];
-    }
-    var line1 = score.line1
-    var line2 = score.line2
-    var keySig = score.keySig;
-    //console.log(keySig);
-    var beatsPer = score.beatsPer;
-    //console.log(beatsPer);
-    var firsthand = score.firsthand;
-    var secondhand = firsthand === 'r' ? 'l' : 'r';
-    var major_or_minor = score.major_or_minor;
-    var twoLines = makePianoStaffMultipleLines(keySig, String(beatsPer) + '/' + '4', 4, 2, 10);
-    renderBarsMultipleLines(twoLines, context);
-    putLineOnStaff(line1, twoLines[0], firsthand, major_or_minor, context);
-    putLineOnStaff(line2, twoLines[1], secondhand, major_or_minor, context);
+    // else if (context.canvas.id === 'canvas-2'){
+    //     var score = STOREEXAMPLE[len - 1];
+    // }
+    var length = score.numBarsPerHand * 2;
+    var emptyBarLines = makePianoStaffMultipleBars([], length, 230, 10, score.clefs);
+    addKeyAndTimeSignature(emptyBarLines, score.timeSig, score.key);
+    renderBarsMultipleLines(emptyBarLines, ctx);
+    putLineOnStaff(score.firstPhrase.notes, emptyBarLines, score.firstHand, 0, score.key, score.timeSig, score.major_or_minor, context);
+    putLineOnStaff(score.secondPhrase.notes, emptyBarLines, score.secondHand, score.numBarsPerHand, score.key, score.timeSig, score.major_or_minor, context);
+
+
+    // var line1 = score.line1
+    // var line2 = score.line2
+    // var keySig = score.keySig;
+    // //console.log(keySig);
+    // var beatsPer = score.beatsPer;
+    // //console.log(beatsPer);
+    // var firsthand = score.firsthand;
+    // var secondhand = firsthand === 'r' ? 'l' : 'r';
+    // var major_or_minor = score.major_or_minor;
+    // var twoLines = makePianoStaffMultipleLines(keySig, String(beatsPer) + '/' + '4', 4, 2, 10);
+    // renderBarsMultipleLines(twoLines, context);
+    // putLineOnStaff(line1, twoLines[0], firsthand, major_or_minor, context);
+    // putLineOnStaff(line2, twoLines[1], secondhand, major_or_minor, context);
 
 }
 
 $('#clearAndReplace').click(function(){clearAndReplace(ctx)}); 
 
-$('#replace-example-2').click(function(){clearAndReplace(ctx2)});
+//$('#replace-example-2').click(function(){clearAndReplace(ctx2)});
 
 
 var scrollHandler = function(initial_x, initial_y, beatsPer, system_spacing, callInterval, context){
@@ -81,10 +89,10 @@ var scrollHandler = function(initial_x, initial_y, beatsPer, system_spacing, cal
         initial_y, beatsPer, system_spacing, callInterval, context)}
     )}
 
-var scrollHandler2 = function(initial_x, initial_y, beatsPer, system_spacing, callInterval, context){
-    $('#button-2').click(function(){scroller(initial_x,
-        initial_y, beatsPer, system_spacing, callInterval, context)})
-}
+// var scrollHandler2 = function(initial_x, initial_y, beatsPer, system_spacing, callInterval, context){
+//     $('#button-2').click(function(){scroller(initial_x,
+//         initial_y, beatsPer, system_spacing, callInterval, context)})
+// }
     
 
 function scroller(initial_x, initial_y, beatsPer, system_spacing, callInterval, context){
@@ -110,14 +118,14 @@ function scroller(initial_x, initial_y, beatsPer, system_spacing, callInterval, 
     x = initial_x; 
     y = initial_y;
     function inner(x, y) {
-        var W = 1300;
-        var H = 400;
+        var W = Math.min(context.canvas.width, 1000);
+        var H = 600;
 
         w = 10;
-        h = 120;
+        h = 150;
         lineCounter = 1;
         var speedConverter =  beatsPer * 53 / 4;
-        if (x > W - 300 && lineCounter < 2) { //lineCounter counts how many lines we've gone through, only two lines per example
+        if (x > W && lineCounter < 3) { //lineCounter counts how many lines we've gone through, only two lines per example
                     // we want the scroller to stop after two lines 
                     lineCounter += 1;
                     y += system_spacing; //move to next line
@@ -127,7 +135,7 @@ function scroller(initial_x, initial_y, beatsPer, system_spacing, callInterval, 
                     
                 }
                 
-        else if (x > W - 300 && lineCounter === 2) { //we've gone through the whole example
+        else if (x > W && lineCounter === 3) { //we've gone through the whole example
             //clearInterval(interval);
             //clearTimeout(timeOut);
             return 'testing';  //exit the inner function. would love to exit the outer function here too

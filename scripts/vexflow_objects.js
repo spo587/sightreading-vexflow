@@ -22,7 +22,7 @@ function makePianoStaffMultipleBars(lines, numBarsRemaining, width, initialDista
     if (numBarsRemaining <= 0){
         return lines;
     }
-    var barsPerLine = findBarsPerLine(width)
+    var barsPerLine = findBarsPerLine(width, ctx);
     
     //console.log(barsPerLine);
     //rewrite makepianostaff so the width and height parameters come first
@@ -31,8 +31,9 @@ function makePianoStaffMultipleBars(lines, numBarsRemaining, width, initialDista
     return makePianoStaffMultipleBars(lines, numBarsRemaining - barsPerLine, width, initialDistanceFromTop, clefs)
 }
 
-function findBarsPerLine(barWidth){
-    var windowWidth =  $(window).width();
+function findBarsPerLine(barWidth, context){
+    var windowWidth = context.canvas.width;
+    //var windowWidth =  $(window).width();
     var numbars = 0;
     windowWidth = windowWidth - barWidth - 75;
     while (windowWidth > 0){

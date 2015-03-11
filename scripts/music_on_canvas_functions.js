@@ -1,4 +1,7 @@
 //todo: fix beams, find key signature bug, and add radio buttons
+//new beam bug,
+//add fingering at beginning of each line
+//multiple groups of each hand, each 4 bars or somthing
 
 
 function makeContext(elementId) {
@@ -6,7 +9,14 @@ function makeContext(elementId) {
     var renderer = new Vex.Flow.Renderer(canvas, Vex.Flow.Renderer.Backends.CANVAS);
     var ctx = renderer.getContext();
     function draw() {
-        ctx.canvas.width  = window.innerWidth;
+        var width = window.innerWidth;
+        if (width < 1100){
+            console.log('limiting width of canvas')
+            ctx.canvas.width  = width;
+        }
+        else {
+            ctx.canvas.width = 1100;
+        }
         //ctx.canvas.height = window.innerHeight;   
     }
     draw();
@@ -204,7 +214,7 @@ function makeSightReading(numBarsPerHand, beatsPerMeasure, beatValue, key, level
     var reverseClefs = firstHand === 'l' ? clefs.reversed : clefs.nonReversed;
     var clefs = clefs.nonReversed;
 
-    var emptyBarLines = makePianoStaffMultipleBars([], numBarsPerHand * 2, 250, 10, reverseClefs);
+    var emptyBarLines = makePianoStaffMultipleBars([], numBarsPerHand * 2, 230, 10, reverseClefs);
     console.log(key);
     addKeyAndTimeSignature(emptyBarLines, timeSig, key);
     renderBarsMultipleLines(emptyBarLines, ctx);
@@ -219,7 +229,9 @@ function makeSightReading(numBarsPerHand, beatsPerMeasure, beatValue, key, level
     putLineOnStaff(firstPhrase.notes, emptyBarLines, firstHand, 0, key, timeSig, major_or_minor, context);
     putLineOnStaff(secondPhrase.notes, emptyBarLines, secondHand, numBarsPerHand, key, timeSig, major_or_minor, context);
     //putLineOnStaff2(firstPhrase.notes, emptyBarLines[0], firstHand, key, timeSig, major_or_minor, context);
-    return {beatsPerMeasure: beatsPerMeasure};
+    return {beatsPerMeasure: beatsPerMeasure, numBarsPerHand: numBarsPerHand, 
+        beatValue: beatValue, key: key, major_or_minor: major_or_minor, timeSig: timeSig,
+        firstPhrase: firstPhrase, secondPhrase: secondPhrase, clefs: reverseClefs, firstHand: firstHand, secondHand: secondHand};
 }
 
 
