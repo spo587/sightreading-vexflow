@@ -33,6 +33,8 @@ function makeExample(context, level, standardFiveFingerOrNot) {
 
 } 
 
+
+
 $('#level-1').click(function(){makeExample(ctx, 1, true)});
 
 $('#level-1-non-standard-position').click(function(){makeExample(ctx, 1, false)})
@@ -47,7 +49,7 @@ $('#level-3').click(function(){makeExample(ctx, 3, true)});
     
 function clearAndReplace(context) {
     clearCanvas(context);
-    var len = STOREEXAMPLE.length
+    var len = STOREEXAMPLE.length;
     //console.log(STOREEXAMPLE);
     if (context.canvas.id === 'canvas-1') {
         var score = STOREEXAMPLE[len - 1]; //retrieve the next to last example, in case more than two have been created
@@ -85,9 +87,11 @@ $('#clearAndReplace').click(function(){clearAndReplace(ctx)});
 
 
 var scrollHandler = function(initial_x, initial_y, beatsPer, system_spacing, callInterval, context){
-    $('#button-1').click(function(){scroller(initial_x, 
-        initial_y, beatsPer, system_spacing, callInterval, context)}
-    )}
+    $('#button-1').click(function(){
+        scroller(initial_x, initial_y, beatsPer, system_spacing, callInterval, context);
+    }
+)}
+
 
 // var scrollHandler2 = function(initial_x, initial_y, beatsPer, system_spacing, callInterval, context){
 //     $('#button-2').click(function(){scroller(initial_x,

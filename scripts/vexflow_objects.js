@@ -61,9 +61,9 @@ function findBarsPerLine(barWidth, context){
 // makes a piano grand staff and renders it to the page
 //was thinking perhaps to separate out the rendering and the creation of the object. later
 function makePianoStaffSingleLine(numBars, width, height, clefs) {
-    if (clefs === undefined){
-        var clefs = ['treble', 'bass'];
-    }
+    // if (clefs === undefined){
+    //     var clefs = ['treble', 'bass'];
+    // }
     //todo make the first bar bigger
     var bars_rh = makeBars(numBars, height, width);
     //var add_to_rh = makeBars(numBars - 1, height, width);
@@ -269,18 +269,39 @@ function convert(scaleDegree, highestScaleDegree){
 }
 
 function addFingeringFirstNoteOfLine(lineMultipleBars, steps_nested, hand, highestScaleDegree){
+    var note1 = lineMultipleBars[0][0];
+    var step1 = steps_nested[0][0];
+    addFingering(note1, decideFingering(step1, hand, highestScaleDegree));
+    return lineMultipleBars;
+}
+
+// function addFingeringFirstNoteOfLine(lineMultipleBars, steps_nested, hand, highestScaleDegree){
+//     var fingerConverter_rh = {lowest: '1', secondLowest: '2', thirdLowest: '3', secondHighest: '4', highest:'5'};
+//     var fingerConverter_lh = {lowest: '5', secondLowest:'4', thirdLowest: '3', secondHighest:'2', highest:'1'};
+//     var note1 = lineMultipleBars[0][0];
+//     var note2 = lineMultipleBars[0][1];
+//     var step1 = steps_nested[0][0];
+//     var step2 = steps_nested[0][1];
+//     if (hand === 'r'){
+//         var fingering = fingerConverter_rh[convert(step1, highestScaleDegree)];
+//     }
+//     else {
+//         var fingering = fingerConverter_lh[convert(step1, highestScaleDegree)];
+//     }
+//     addFingering(note1, fingering);
+//     return lineMultipleBars;
+// }
+
+
+function decideFingering(step, hand, highestScaleDegree){
     var fingerConverter_rh = {lowest: '1', secondLowest: '2', thirdLowest: '3', secondHighest: '4', highest:'5'};
     var fingerConverter_lh = {lowest: '5', secondLowest:'4', thirdLowest: '3', secondHighest:'2', highest:'1'};
-    var note1 = lineMultipleBars[0][0];
-    var note2 = lineMultipleBars[0][1];
-    var step1 = steps_nested[0][0];
-    var step2 = steps_nested[0][1];
     if (hand === 'r'){
-        var fingering = fingerConverter_rh[convert(step1, highestScaleDegree)];
+        var fingering = fingerConverter_rh[convert(step, highestScaleDegree)];
     }
     else {
-        var fingering = fingerConverter_lh[convert(step1, highestScaleDegree)];
+        var fingering = fingerConverter_lh[convert(step, highestScaleDegree)];
     }
-    addFingering(note1, fingering);
-    return lineMultipleBars;
+    console.log(fingering);
+    return fingering;
 }

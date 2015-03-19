@@ -9,6 +9,10 @@ function unNestArray(array){
 }
 
 
+function randomChoiceFromArray(arr){
+    return arr[Math.floor(Math.random() * arr.length)]
+}
+
 function findLength(nestedArray){
     var total = 0;
     nestedArray.forEach(function(element, index, array){
