@@ -143,7 +143,6 @@ function formatVoice(voice, stave, context) {
     //var beams = Vex.Flow.Beam.applyAndGetBeams(voice);
     //console.log(voice);
     var beams = beamMeasureByBeat(voice);
-    console.log(beams);
     var formatter = new Vex.Flow.Formatter().joinVoices([voice]).formatToStave([voice], stave);
     voice.draw(context,stave);
     beams.forEach(function(beam){
@@ -185,13 +184,14 @@ function setStaff(numBarsPerHand, numPhrases, beatsPerMeasure, beatValue, key, m
     addKeyAndTimeSignature(emptyBarLines, timeSig, key);
     renderBarsMultipleLines(emptyBarLines, ctx);
 
-    return {octaves: octaves, emptyBarLines: emptyBarLines, timeSig: timeSig}; //right hand clef first now
+    return {octaves: octaves, emptyBarLines: emptyBarLines, timeSig: timeSig, clefs: clefs}; //right hand clef first now
 }
 
 function makeSightReading(numBarsPerHand, numPhrases, beatsPerMeasure, beatValue, key, level, major_or_minor, highestScaleDegree1, highestScaleDegree2, context){
     var octavesAndClefsAndBars = setStaff(numBarsPerHand, numPhrases, beatsPerMeasure, beatValue, key, major_or_minor, context)
     var octaves = octavesAndClefsAndBars.octaves;
     var clefs = octavesAndClefsAndBars.clefs;
+    console.log(clefs);
     var timeSig = octavesAndClefsAndBars.timeSig;
     var emptyBarLines = octavesAndClefsAndBars.emptyBarLines;
     var firstClef = octaves.firstHand === 'r' ? octaves.rightClef : octaves.leftClef;
@@ -225,11 +225,9 @@ function makeSightReading(numBarsPerHand, numPhrases, beatsPerMeasure, beatValue
         measureCounter += numBarsPerHand;
     });
     //need to modify fingering function to search for hand, not clef
-    
-    
     return {beatsPerMeasure: beatsPerMeasure, numBarsPerHand: numBarsPerHand, 
         beatValue: beatValue, key: key, major_or_minor: major_or_minor, timeSig: timeSig,
-        phrases: phrases, clefs: clefs, firstHand: firstHand, secondHand: secondHand};
+        phrases: phrases, clefs: clefs, firstHand: firstHand, secondHand: secondHand, handOrder: handOrder, numPhrases: numPhrases};
 }
 
 function addFingeringFirstNoteOfStaffLines(phrase, measureNumber, emptyBarLines, hand, highestScaleDegree){
@@ -247,13 +245,12 @@ function addFingeringFirstNoteOfStaffLines(phrase, measureNumber, emptyBarLines,
 }
 
 
-function makeRandomSightreading(level, standardFiveFingerOrNot, context){
+function makeRandomSightreading(level, numPhrases, standardFiveFingerOrNot, context, key, major_or_minor, beatsPer, beatValue){
     var numbars = 4;
-    var numPhrases = 2;
     var distance_from_top = 10;
     var context = ctx;
-    var keyObject = decideKey(level);
-    var timeSig = decideTimeSig(level);
+    var keyObject = key === undefined ? decideKey(level) : {key: key, major_or_minor: major_or_minor};
+    var timeSig = beatsPer === undefined ? decideTimeSig(level) : {beatsPerMeasure: beatsPer, beatValue: beatValue};
     var highestScaleDegrees = decideHighFingerChoice(standardFiveFingerOrNot, keyObject);
     //console.log(highestScaleDegrees);
     console.log(keyObject.key);

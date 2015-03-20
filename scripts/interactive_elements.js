@@ -13,27 +13,43 @@ function clearCanvas(context) {
 
 
 
+
 var STOREEXAMPLE = []; //oh dear a global variable, not good i know
 var TIMESCALLED = 0;
 
 
-function makeExample(context, level, standardFiveFingerOrNot) {
+function makeExample(context, level, numPhrases, beatsPerMeasure, beatValue, key, major_or_minor, standardFiveFingerOrNot) {
     clearCanvas(context);
     //clearCanvas(context2)
-    var example1 = makeRandomSightreading(level, standardFiveFingerOrNot, context);
-    var beatsPerExample1 = example1.beatsPerMeasure;
+    var example = makeRandomSightreading(level, numPhrases, standardFiveFingerOrNot, context, key, major_or_minor, beatsPerMeasure, beatValue)
+    //var example1 = makeRandomSightreading(level, standardFiveFingerOrNot, context);
+    var beatsPerExample1 = example.beatsPerMeasure;
     //var example2 = makeRandomSightReading(4, level, 4, 10, context2, standardFiveFingerOrNot);
     //var beatsPerExample2 = example2.beatsPer;
     scrollHandler(75, 40, beatsPerExample1, 200, 20, context);
     //scrollHandler2(100, 50, beatsPerExample2, 200, 20, context2);
-    var ret = [example1] //, example2];
+    var ret = [example] //, example2];
     STOREEXAMPLE = STOREEXAMPLE.concat(ret);
     console.log(STOREEXAMPLE);
     return ret;
 
 } 
 
-
+$('#submit').click(function(){
+    var level = Number($('input[name=level]:checked', '#first').val());
+    var numPhrases = Number($('#num-phrases').val());
+    var beatsPerMeasure = Number($('input[name=time-sig]:checked', '#time').val());
+    beatsPerMeasure = beatsPerMeasure !== 0 ? beatsPerMeasure : undefined;
+    var key = $('#key-sig').val() === 'random' ? undefined : Number($('#key-sig').val());
+    var major_or_minor = $('#major_or_minor').val() === 'random' ? undefined : $('#major-or-minor').val();
+    var standardFiveFingerOrNot = Boolean($('input[name=five-finger]:checked', '#five-finger-position').val());
+    var beatValue = 4;
+    makeExample(ctx, level, numPhrases, beatsPerMeasure, beatValue, key, major_or_minor, standardFiveFingerOrNot)
+    // makeSightReading(4, numPhrases, beatsPerMeasure, 4, 0, level, 'M', 4, 4, ctx);
+    // var params = setParameters(params);
+    // clearCanvas(ctx);
+    // makeSightReading(params);
+})
 
 $('#level-1').click(function(){makeExample(ctx, 1, true)});
 
@@ -49,7 +65,7 @@ $('#level-3').click(function(){makeExample(ctx, 3, true)});
     
 function clearAndReplace(context) {
     clearCanvas(context);
-    var len = STOREEXAMPLE.length;
+    var len = STOREEXAMPLE.length
     //console.log(STOREEXAMPLE);
     if (context.canvas.id === 'canvas-1') {
         var score = STOREEXAMPLE[len - 1]; //retrieve the next to last example, in case more than two have been created
@@ -57,27 +73,16 @@ function clearAndReplace(context) {
     // else if (context.canvas.id === 'canvas-2'){
     //     var score = STOREEXAMPLE[len - 1];
     // }
-    var length = score.numBarsPerHand * 2;
+    var length = score.numBarsPerHand * score.numPhrases;
     var emptyBarLines = makePianoStaffMultipleBars([], length, 230, 10, score.clefs);
     addKeyAndTimeSignature(emptyBarLines, score.timeSig, score.key);
     renderBarsMultipleLines(emptyBarLines, ctx);
-    putLineOnStaff(score.firstPhrase.notes, emptyBarLines, score.firstHand, 0, score.key, score.timeSig, score.major_or_minor, context);
-    putLineOnStaff(score.secondPhrase.notes, emptyBarLines, score.secondHand, score.numBarsPerHand, score.key, score.timeSig, score.major_or_minor, context);
+    var measureCounter = 0;
+    score.phrases.forEach(function(phrase, index){
+        putLineOnStaff(phrase.notes, emptyBarLines, score.handOrder[index].hand, measureCounter, score.key, score.timeSig, score.major_or_minor, context);
+        measureCounter += score.numBarsPerHand;
+    });
 
-
-    // var line1 = score.line1
-    // var line2 = score.line2
-    // var keySig = score.keySig;
-    // //console.log(keySig);
-    // var beatsPer = score.beatsPer;
-    // //console.log(beatsPer);
-    // var firsthand = score.firsthand;
-    // var secondhand = firsthand === 'r' ? 'l' : 'r';
-    // var major_or_minor = score.major_or_minor;
-    // var twoLines = makePianoStaffMultipleLines(keySig, String(beatsPer) + '/' + '4', 4, 2, 10);
-    // renderBarsMultipleLines(twoLines, context);
-    // putLineOnStaff(line1, twoLines[0], firsthand, major_or_minor, context);
-    // putLineOnStaff(line2, twoLines[1], secondhand, major_or_minor, context);
 
 }
 
@@ -87,11 +92,9 @@ $('#clearAndReplace').click(function(){clearAndReplace(ctx)});
 
 
 var scrollHandler = function(initial_x, initial_y, beatsPer, system_spacing, callInterval, context){
-    $('#button-1').click(function(){
-        scroller(initial_x, initial_y, beatsPer, system_spacing, callInterval, context);
-    }
-)}
-
+    $('#button-1').click(function(){scroller(initial_x, 
+        initial_y, beatsPer, system_spacing, callInterval, context)}
+    )}
 
 // var scrollHandler2 = function(initial_x, initial_y, beatsPer, system_spacing, callInterval, context){
 //     $('#button-2').click(function(){scroller(initial_x,
@@ -145,6 +148,7 @@ function scroller(initial_x, initial_y, beatsPer, system_spacing, callInterval, 
             return 'testing';  //exit the inner function. would love to exit the outer function here too
         }
         else if (exitFunction > 0){
+            console.log('returning');
             return 'testing';
         }
         x += speed / speedConverter;

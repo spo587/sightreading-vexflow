@@ -1,20 +1,15 @@
 function beamMeasureByBeat(voice){
     var beatsPerMeasure = voice.totalTicks.numerator / 4096;
-    console.log(beatsPerMeasure);
     var beams = [];
     for (var i=0; i<beatsPerMeasure; i+=1){
         var empty = [];
-        console.log(i);
         var beatNotes = beatOfNotes(empty, voice.tickables, i, 1);
         //now deal with the stem directions bug. if the beamed notes have different stem 
         //directions, we have to change them so they're all the same
         if (!stemDirectionsSame(beatNotes)){
             makeStemDirectionsSame(beatNotes)
         }
-        console.log(beatNotes);
-        console.log('next line');
         if (beatNotes.length > 1){
-                console.log('adding beam');
                 beams.push(new Vex.Flow.Beam(beatNotes));
             }
         }
@@ -42,10 +37,8 @@ function makeStemDirectionsSame(notes){
 function decideStemDirection(notes){
     var middle = 3; //third line is middle of staff, reference for beam
     var upOrDown = notes.reduce(function(previous, current){
-        console.log(Math.abs(current.max_line - 3));
         return Math.abs(current.max_line - 3) > previous ? current.max_line : previous;
     }, 0);
-    console.log(upOrDown);
     return upOrDown > 0 ? 1 : -1;
 }
 

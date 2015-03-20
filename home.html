@@ -20,43 +20,58 @@
     </title>
     
 </head>
-
 <body>
     <header>
         <h1> Welcome to the piano sight reading page for beginners (by Sam Post) </h1>
         <h2> (Designed for use on a tablet computer in Chrome, Safari or Firefox. Do not attempt use with Internet Explorer.) </h2>
 
     </header>
-     <p> Please email samueljpost@gmail.com with questions, comments or suggestions (or bugs)! <br>
-    <a href='www.github.com/spo587/sighteading-vexflow'>Help me develop this page!</a>  </p>
-        <p>
 
-        
-        First, click level 1, level 2, or level 3 to generate two new exercises. <br>
-
-
-        Click the start button to use the scrolling feature. There will be a full measure delay (turn up your volume to hear the beats) before the scroller starts going. You can alter the tempo by putting in your own (in beats per minute). The default tempo is 80 beats per minute, if you leave it blank. <br>
-        At any time you can start over the same exercise by clicking the retry button, and no need to refresh the page; just click level 1 or level 2 to generate new exercises.
-    </p>
     <p>
-        <button type='button' id='level-1'>level 1</button>
-        <button type='button' id='level-2'>level 2</button>
-        <button type='button' id='level-3'>level 3</button>
-        Optional: tempo <input type='text' id='slider-speed-1'></input>
-        
-        <button type='button' id='button-1'>Start first piece!</button>
-        <button type= 'button' id='stop-start-over-1'> try first piece again</button>
-        <audio src="https://dl.dropboxusercontent.com/u/95890750/vexflow_sightreading/sounds/10211%5ERVBCLICK.mp3" type='audio/mpeg' id="click" autostart="false"></audio><br>
-        <button type='button' id='level-1-non-standard-position'>level 1, different five-finger position </button>
-        <button type='button' id='level-2-non-standard-position'>level 2, different five-finger position </button>
-
-
-        
+        First, select appropriate level. All other inputs can be left as defaults (or you can select key, time and
+        other inputs as you please. Click submit and a sight reading example will pop up on the page (hopefully!). 
+        Click submit again to generate a new one. <br><br>For teachers: use the tempo option and click 'start' to use the blackout scroller. <br><br>
+        Happy sight reading!<br>
         
     </p>
-    <p class='timer'> countdown:   </p>
-    <canvas class='canvas-class' id='canvas-1' width="1300" height="1000">Your browser is not supported
-    </canvas>
-            
-                
 
+
+        level
+<form id='first'>
+    <input type="radio" name='level' value="1" id='box-1' checked/>1</input>
+    <input type="radio" name="level" value="2" id='box-2'>2</input>
+    <input type="radio" name="level" value="3" id='box-3'>3</input>
+</form>
+<br> five-finger position
+<form id='five-finger-position'>
+    <input type="radio" name="five-finger" value="true" id='box-1' checked/> standard</input>
+    <input type="radio" name="five-finger" value="" id='box-2'>nonstandard</input>
+</form>
+number of phrases, 2 or more
+<form id='third'>
+    <input type="text" id='num-phrases' value='2'</input>
+</form>
+time signature
+<form id='time'>
+    <input type="radio" name="time-sig" value="3" id='box-1'> 3</input>
+    <input type="radio" name="time-sig" value="4" id='box-2'>4</input>
+    <input type="radio" name="time-sig" value="" id='box-3' checked/>random</input>
+</form>
+key signature, input number of half-steps up from C or leave blank for random (appropriate for level)
+<form>
+    <input type="text" value='random' id='key-sig'</input>
+</form>
+Major or minor (M for major, m for minor)
+<form>
+    <input type='text' value='random' id='major-or-minor'</input>
+</form><br>
+<input id='submit' type="submit" value="Submit"><br><br>
+        Optional: tempo <input type='text' value='80' id='slider-speed-1'></input>
+        
+        <button type='button' id='button-1'>start!</button>
+        <button type= 'button' id='stop-start-over-1'> let's go back and try that again, shall we</button>
+        <audio src="https://dl.dropboxusercontent.com/u/95890750/vexflow_sightreading/sounds/10211%5ERVBCLICK.mp3" type='audio/mpeg' id="click" autostart="false"></audio>
+    
+    <p class='timer'> countdown:   </p>
+    <canvas class='canvas-class' id='canvas-1' width="1300" height="2000"></canvas>
+            
