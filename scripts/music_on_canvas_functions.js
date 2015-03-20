@@ -158,11 +158,11 @@ function formatNotes(notes, stave, context) {
 }
 
 
-function decideOctaves2(){
+function decideOctaves2(octaves){
     var choices = [2,3,4,5];
-    var first = randomChoiceFromArray(choices);
+    var first = octaves === undefined ? randomChoiceFromArray(choices) : octaves[0];
     choices.splice(choices.indexOf(first), 1);
-    var second = randomChoiceFromArray(choices);
+    var second = octaves === undefined ? randomChoiceFromArray(choices) : octaves[1];
 
     var firstHand = first < second ? 'l' : 'r';
     var secondHand = firstHand === 'l' ? 'r': 'l';
@@ -173,9 +173,10 @@ function decideOctaves2(){
 
 
 
-function setStaff(numBarsPerHand, numPhrases, beatsPerMeasure, beatValue, key, major_or_minor, context){
+function setStaff(numBarsPerHand, numPhrases, beatsPerMeasure, beatValue, key, major_or_minor, context, octaves){
     var timeSig = String(beatsPerMeasure) + '/' + String(beatValue);
-    var octaves = decideOctaves2();
+    var octaves = decideOctaves2(octaves);
+    console.log(octaves);
     //var octavesArray = [octaves['l'], octaves['r']]; //should be ordered left to right
     var clefs = [octaves.rightClef, octaves.leftClef]
     // var reverseClefs = octaves.firstHand === 'l' ? clefsInit.reversed : clefsInit.nonReversed;
@@ -187,8 +188,8 @@ function setStaff(numBarsPerHand, numPhrases, beatsPerMeasure, beatValue, key, m
     return {octaves: octaves, emptyBarLines: emptyBarLines, timeSig: timeSig, clefs: clefs}; //right hand clef first now
 }
 
-function makeSightReading(numBarsPerHand, numPhrases, beatsPerMeasure, beatValue, key, level, major_or_minor, highestScaleDegree1, highestScaleDegree2, context){
-    var octavesAndClefsAndBars = setStaff(numBarsPerHand, numPhrases, beatsPerMeasure, beatValue, key, major_or_minor, context)
+function makeSightReading(numBarsPerHand, numPhrases, beatsPerMeasure, beatValue, key, level, major_or_minor, highestScaleDegree1, highestScaleDegree2, context, octaves){
+    var octavesAndClefsAndBars = setStaff(numBarsPerHand, numPhrases, beatsPerMeasure, beatValue, key, major_or_minor, context, octaves);
     var octaves = octavesAndClefsAndBars.octaves;
     var clefs = octavesAndClefsAndBars.clefs;
     console.log(clefs);
@@ -245,7 +246,7 @@ function addFingeringFirstNoteOfStaffLines(phrase, measureNumber, emptyBarLines,
 }
 
 
-function makeRandomSightreading(level, numPhrases, standardFiveFingerOrNot, context, key, major_or_minor, beatsPer, beatValue){
+function makeRandomSightreading(level, numPhrases, standardFiveFingerOrNot, context, key, major_or_minor, beatsPer, beatValue, octaves){
     var numbars = 4;
     var distance_from_top = 10;
     var context = ctx;
@@ -253,8 +254,9 @@ function makeRandomSightreading(level, numPhrases, standardFiveFingerOrNot, cont
     var timeSig = beatsPer === undefined ? decideTimeSig(level) : {beatsPerMeasure: beatsPer, beatValue: beatValue};
     var highestScaleDegrees = decideHighFingerChoice(standardFiveFingerOrNot, keyObject);
     //console.log(highestScaleDegrees);
-    console.log(keyObject.key);
-    return makeSightReading(numbars, numPhrases, timeSig.beatsPerMeasure, timeSig.beatValue, keyObject.key, level, keyObject.major_or_minor, highestScaleDegrees[0], highestScaleDegrees[1], context);
+    var octaveChoice = octaves === true ? [3,4] : undefined;
+    console.log(octaveChoice);
+    return makeSightReading(numbars, numPhrases, timeSig.beatsPerMeasure, timeSig.beatValue, keyObject.key, level, keyObject.major_or_minor, highestScaleDegrees[0], highestScaleDegrees[1], context, octaveChoice);
 }
 
 function decideHighFingerChoice(standardFiveFingerOrNot, keyObject){

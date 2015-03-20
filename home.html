@@ -28,50 +28,58 @@
     </header>
 
     <p>
-        First, select appropriate level. All other inputs can be left as defaults (or you can select key, time and
-        other inputs as you please. Click submit and a sight reading example will pop up on the page (hopefully!). 
+        First, select level. (Level 1 is steps and repeated notes only, level 2 includes skips, level 3 a wider range, plus eighth notes.) All other inputs can be left as defaults (or you can select key, time and
+        other inputs as you please). Click submit and a sight reading example will pop up on the page (hopefully!). 
         Click submit again to generate a new one. <br><br>For teachers: use the tempo option and click 'start' to use the blackout scroller. <br><br>
-        Happy sight reading!<br>
+        Happy sight reading! Email samueljpost@gmail.com with questions, concerns, bug reports, etc.<br>
         
     </p>
 
 
         level
-<form id='first'>
-    <input type="radio" name='level' value="1" id='box-1' checked/>1</input>
-    <input type="radio" name="level" value="2" id='box-2'>2</input>
-    <input type="radio" name="level" value="3" id='box-3'>3</input>
-</form>
-<br> five-finger position
-<form id='five-finger-position'>
-    <input type="radio" name="five-finger" value="true" id='box-1' checked/> standard</input>
-    <input type="radio" name="five-finger" value="" id='box-2'>nonstandard</input>
-</form>
-number of phrases, 2 or more
-<form id='third'>
-    <input type="text" id='num-phrases' value='2'</input>
-</form>
-time signature
-<form id='time'>
-    <input type="radio" name="time-sig" value="3" id='box-1'> 3</input>
-    <input type="radio" name="time-sig" value="4" id='box-2'>4</input>
-    <input type="radio" name="time-sig" value="" id='box-3' checked/>random</input>
-</form>
-key signature, input number of half-steps up from C or leave blank for random (appropriate for level)
-<form>
-    <input type="text" value='random' id='key-sig'</input>
-</form>
-Major or minor (M for major, m for minor)
-<form>
-    <input type='text' value='random' id='major-or-minor'</input>
-</form><br>
-<input id='submit' type="submit" value="Submit"><br><br>
-        Optional: tempo <input type='text' value='80' id='slider-speed-1'></input>
+    <form id='first'>
+        <input type="radio" name='level' value="1" id='box-1' checked/>1</input>
+        <input type="radio" name="level" value="2" id='box-2'>2</input>
+        <input type="radio" name="level" value="3" id='box-3'>3</input>
+    </form>
+    <br> five-finger position
+    <form id='five-finger-position'>
+        <input type="radio" name="five-finger" value="true" id='box-1' checked/> standard</input>
+        <input type="radio" name="five-finger" value="" id='box-2'>nonstandard</input>
+    </form>
+    <br> Range (octaves the hands play in)
+    <form id='octave-range'>
+        <input type="radio" name="octave" value="" id='box-1' checked/> extended</input>
+        <input type="radio" name="octave" value="true" id='box-2'>limited (treble and bass clef only)</input>
+    </form>
+
+    <br>number of phrases, 2 or more
+    <form id='third'>
+        <input type="text" id='num-phrases' value='2'</input>
+    </form>
+    <br>time signature
+    <form id='time'>
+        <input type="radio" name="time-sig" value="3" id='box-1'> 3</input>
+        <input type="radio" name="time-sig" value="4" id='box-2'>4</input>
+        <input type="radio" name="time-sig" value="2" id='box-2'>2</input>
+        <input type="radio" name="time-sig" value="" id='box-3' checked/>random</input>
+    </form>
+    <br>key signature, input number of half-steps up from C or leave blank for random (appropriate for level)
+    <form>
+        <input type="text" value='random' id='key-sig'</input>
+    </form>
+    <br>Major or minor (M for major, m for minor, or leave for random)
+    <form>
+        <input type='text' value='random' id='major-or-minor'</input>
+    </form><br>
+    <input id='submit' type="submit" value="Submit"><br><br>
+    Optional: tempo <input type='text' value='80' id='slider-speed-1'></input>
         
-        <button type='button' id='button-1'>start!</button>
-        <button type= 'button' id='stop-start-over-1'> let's go back and try that again, shall we</button>
-        <audio src="https://dl.dropboxusercontent.com/u/95890750/vexflow_sightreading/sounds/10211%5ERVBCLICK.mp3" type='audio/mpeg' id="click" autostart="false"></audio>
+    <button type='button' id='button-1'>start!</button>
+    <button type= 'button' id='stop-start-over-1'> let's go back and try that again, shall we</button>
+    <audio src="https://dl.dropboxusercontent.com/u/95890750/vexflow_sightreading/sounds/10211%5ERVBCLICK.mp3" type='audio/mpeg' id="click" autostart="false"></audio>
     
     <p class='timer'> countdown:   </p>
     <canvas class='canvas-class' id='canvas-1' width="1300" height="2000"></canvas>
+</body>
             

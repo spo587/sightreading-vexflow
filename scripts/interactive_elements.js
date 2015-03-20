@@ -12,16 +12,14 @@ function clearCanvas(context) {
 } 
 
 
-
-
 var STOREEXAMPLE = []; //oh dear a global variable, not good i know
 var TIMESCALLED = 0;
 
 
-function makeExample(context, level, numPhrases, beatsPerMeasure, beatValue, key, major_or_minor, standardFiveFingerOrNot) {
+function makeExample(context, level, numPhrases, beatsPerMeasure, beatValue, key, major_or_minor, standardFiveFingerOrNot, octaves) {
     clearCanvas(context);
     //clearCanvas(context2)
-    var example = makeRandomSightreading(level, numPhrases, standardFiveFingerOrNot, context, key, major_or_minor, beatsPerMeasure, beatValue)
+    var example = makeRandomSightreading(level, numPhrases, standardFiveFingerOrNot, context, key, major_or_minor, beatsPerMeasure, beatValue, octaves)
     //var example1 = makeRandomSightreading(level, standardFiveFingerOrNot, context);
     var beatsPerExample1 = example.beatsPerMeasure;
     //var example2 = makeRandomSightReading(4, level, 4, 10, context2, standardFiveFingerOrNot);
@@ -44,7 +42,8 @@ $('#submit').click(function(){
     var major_or_minor = $('#major_or_minor').val() === 'random' ? undefined : $('#major-or-minor').val();
     var standardFiveFingerOrNot = Boolean($('input[name=five-finger]:checked', '#five-finger-position').val());
     var beatValue = 4;
-    makeExample(ctx, level, numPhrases, beatsPerMeasure, beatValue, key, major_or_minor, standardFiveFingerOrNot)
+    var octaves = Boolean($('input[name=octave]:checked', '#octave-range').val());
+    makeExample(ctx, level, numPhrases, beatsPerMeasure, beatValue, key, major_or_minor, standardFiveFingerOrNot, octaves)
     // makeSightReading(4, numPhrases, beatsPerMeasure, 4, 0, level, 'M', 4, 4, ctx);
     // var params = setParameters(params);
     // clearCanvas(ctx);
