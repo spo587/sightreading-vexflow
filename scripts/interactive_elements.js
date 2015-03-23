@@ -24,7 +24,7 @@ function makeExample(context, level, numPhrases, beatsPerMeasure, beatValue, key
     var beatsPerExample1 = example.beatsPerMeasure;
     //var example2 = makeRandomSightReading(4, level, 4, 10, context2, standardFiveFingerOrNot);
     //var beatsPerExample2 = example2.beatsPer;
-    scrollHandler(75, 40, beatsPerExample1, 200, 20, context);
+    scrollHandler(beatsPerExample1, example.numLines, example.barsPerLine * 230 + 50, context);
     //scrollHandler2(100, 50, beatsPerExample2, 200, 20, context2);
     var ret = [example] //, example2];
     STOREEXAMPLE = STOREEXAMPLE.concat(ret);
@@ -90,9 +90,9 @@ $('#clearAndReplace').click(function(){clearAndReplace(ctx)});
 //$('#replace-example-2').click(function(){clearAndReplace(ctx2)});
 
 
-var scrollHandler = function(initial_x, initial_y, beatsPer, system_spacing, callInterval, context){
-    $('#button-1').click(function(){scroller(initial_x, 
-        initial_y, beatsPer, system_spacing, callInterval, context)}
+
+var scrollHandler = function(beatsPer, numLines, width, context){
+    $('#button-1').click(function(){scroller(beatsPer, numLines, width, context)}
     )}
 
 // var scrollHandler2 = function(initial_x, initial_y, beatsPer, system_spacing, callInterval, context){
@@ -100,284 +100,68 @@ var scrollHandler = function(initial_x, initial_y, beatsPer, system_spacing, cal
 //         initial_y, beatsPer, system_spacing, callInterval, context)})
 // }
     
+function countdown(speed, beatsPer){
 
-function scroller(initial_x, initial_y, beatsPer, system_spacing, callInterval, context){
-    var exitFunction;
-    $('#stop-start-over-1').click(function(){
-        clearAndReplace(ctx);
-        exitFunction = 1;
-    })
-    $('#stop-start-over-2').click(function(){
-        clearAndReplace(ctx2);
-        exitFunction = 1;
-    })
-    if (context.canvas.id === 'canvas-1') {
-        var speed = Number($('#slider-speed-1').val());
-    }
-    else if (context.canvas.id === 'canvas-2') {
-        var speed = Number($('#slider-speed-2').val());
-    }
-    if (speed === undefined || speed === 0) {
-        speed = 80;
-    }
-    //console.log(context);    
-    x = initial_x; 
-    y = initial_y;
-    function inner(x, y) {
-        var W = Math.min(context.canvas.width, 1000);
-        var H = 600;
-
-        w = 10;
-        h = 150;
-        lineCounter = 1;
-        var speedConverter =  beatsPer * 53 / 4;
-        if (x > W && lineCounter < 3) { //lineCounter counts how many lines we've gone through, only two lines per example
-                    // we want the scroller to stop after two lines 
-                    lineCounter += 1;
-                    y += system_spacing; //move to next line
-                    x = initial_x; //x back to its orig
-                    x += speed / speedConverter;
-                    context.fillRect(x,y,w,h);
-                    
-                }
-                
-        else if (x > W && lineCounter === 3) { //we've gone through the whole example
-            //clearInterval(interval);
-            //clearTimeout(timeOut);
-            return 'testing';  //exit the inner function. would love to exit the outer function here too
-        }
-        else if (exitFunction > 0){
-            console.log('returning');
-            return 'testing';
-        }
-        x += speed / speedConverter;
-        context.fillRect(x,y,w,h);
-        var timeoutId2 = setTimeout(function(){inner(x, y)}, callInterval);
-    }
-    var count = beatsPer //3 beats
-    $('.timer').text('countdown:  ' + String(count));
-    var counter = setInterval(timer, 55*1000/speed); //countdown
-    var clicker = setInterval(sound, 55*1000/speed); //beat clicks for the countdown
-    function sound() {
-        document.getElementById('click').play(); //jquery not working here
-    }
-    function timer() {
-        count = count - 1;
-        if (count <= 0) {
-           clearInterval(counter);
-           clearInterval(clicker);
-           $('.timer').text('start!');
-           return;
-        }
-
-        $('.timer').text('countdown:  ' + String(count));
-    }
-    sound();
-    timeoutId = setTimeout(function(){inner(x, y)}, beatsPer*60/speed*1000 + 500);
 }
 
-//WHAT??
-// i tried this in a few places, replacing the anonymous functions from the click handlers
-// since they get called a few times with the same basic code. doesn't work. functions get called
-// when the page loads instead. wtf???
+function fillIn(speed, width, numLines){
+    var exitFunction = 0;
+    var lineCounter = 1;
+    var initial = - speed * 50 / 20;
+    var distFromTop = 40;
+    //ctx.fillStyle = 'white';
+    f = function(){
+        //console.log('f going');
+        ctx.fillRect(75, distFromTop, initial, 150);
+        //console.log(initial);
+    }
+    move = function(){
+        //console.log('move going');
+        initial += speed / 20;
+        if (initial > width && lineCounter < numLines) {
+            distFromTop += 200;
+            lineCounter += 1;
+            initial = 0;
+        }
+        else if (initial > width && lineCounter === numLines){
+            clearInterval(id);
+            clearTimeout(id2);
+        }
 
-//does not work
-// function clearAndReplace(context){
-//     var example = context === ctx ? STOREEXAMPLE : STOREEXAMPLE2
-//     clearCanvas(context);
-//     console.log(example);
-//     var notes = example[0].notes;
-//     var keySig = example[0].keySig;
-//     console.log(keySig);
-//     var beatsPer = example[0].beatsPer;
-//     console.log(beatsPer);
-//     var firsthand = example[0].firsthand;
-//     putNotesBackOnSystems(notes, firsthand, keySig, beatsPer, context);
-
-// }
-
-
-
-
-
-// function scrollAcross(initial_x, initial_y, system_spacing, beatsPerFirst, beatsPerSecond, callInterval){
-//     var W = 1300;
-//     var H = 400;
-//     var x = initial_x; 
-//     var y = initial_y;
-//     var w = 10;
-//     var h = 120;
-//     var speedConverter =  beatsPerFirst * 53 / 4;
-
-//     var lineCounter = 1;
-//     this.drawer = function draw(speed, context) {
-       
-//         var drawHelper = function() {this.drawer(speed, context)}; // will use this variable in settimeout
-//          //don't worry about this, just converts to beats per second
-//         x += speed / speedConverter;
-//         context.fillRect(x, y, w, h);
-
-//         if (x > W - 300 && lineCounter < 2) { //lineCounter counts how many lines we've gone through, only two lines per example
-//             // we want the scroller to stop after two lines 
-//             lineCounter += 1;
-//             y += system_spacing; //move to next line
-//             x = initial_x; //x back to its orig
-//             x += speed / speedConverter;
-//             context.fillRect(x,y,w,h);
-            
-//         }
+    }
+    var id2;
+    fMove = function(){
+        //console.log('fmove going');
+        id2 = setTimeout(f, 1000);
+        move()
+    }
+    var id = setInterval(fMove, 20);
+    $('#stop-start-over-1').click(function(){
+        //console.log('click ending');
+        exitFunction = 1;
+        clearInterval(id);
+        clearTimeout(id2);
+        var clear = function(){
+            clearAndReplace(ctx);
+        }
+        var done = setTimeout(clear, 1000);
         
-//         else if (x > W - 300 && lineCounter === 2) { //we've gone through the whole example
-//             return undefined;  //exit the inner function. would love to exit the outer function here too
-//         }
-//         var timeoutID = window.setTimeout(drawHelper, callInterval); //call this shit over and over to scroll across
-//     }
+    });
 
-
-//     whatever(initial_x, initial_y, beatsPerFirst, system_spacing, callInterval, ctx);
-
-
-            
-
-
-    // $('#button-2').click(function() {
-    //     var speed = Number($('#slider-speed-2').val());
-    //     if (speed === undefined || speed === 0) {
-    //         speed = 80;
-    //     }
-    //     lineCounter = 1;
-    //     //y += system_spacing;
-    //     y = initial_y;
-    //     x = initial_x;
-    //     w= 10;
-    //     h = 120; 
-    //     // check if music has been put on the canvas already!
-    //     //if (!isCanvasBlank(canvas2)) {
-    //     var timeout2 = setTimeout(function() {this.drawer(speed, ctx2)}, 3*60/speed*1000);   
-        
-    // });
-//}
+}
 
 
 
 
 
+function scroller(beatsPer, numLines, width, context){
+    // scroll across the screen at the specified speed.
+    // activate the countdown
+    //pause button
+    // exit button and replace with the previous example
+    var speed = Number($('#slider-speed-1').val());
+    //countdown(speed, beatsPer);
+    fillIn(speed, width, numLines);
 
-        // setInterval(function(){
-        //     x += speed / speedConverter;
-        //     context.fillRect(x, y, w, h)
-        // },) //scrolls at the right speed
-        // var count = 3 //3 beats
-        // $('#timer').text('countdown:  3');
-        // var counter = setInterval(timer, 55*1000/speed); //countdown
-        // var clicker = setInterval(sound, 55*1000/speed); //beat clicks for the countdown
-        // function sound() {
-        //     document.getElementById('click').play(); //jquery not working here
-        // }
-        // function timer() {
-        //     count = count - 1;
-        //     if (count <= 0) {
-        //        clearInterval(counter);
-        //        clearInterval(clicker);
-        //        $('#timer').text('start!');
-        //        return;
-        //     }
-
-        //     $('#timer').text('countdown:  ' + String(count));
-        // }
-        // sound(); //to go at the first click
-
-// //tried it a diff way, not working
-// var scrollAcross = {
-//     setup : function(initial_x, initial_y, system_spacing, beatsPerFirst, beatsPerSecond, callInterval) {
-//         return {x: initial_x, y: initial_y, W: canvas.width, H: canvas.height, w : 10, h: 120, lineCounter: 1};
-//     },
-//     draw : function drawer(speed, context, initial_x, initial_y, system_spacing, beatsPerFirst, beatsPerSecond, callInterval) {
-//         //var drawHelper = this.draw(speed, context, initial_x, initial_y, system_spacing, beatsPerFirst, beatsPerSecond, callInterval);
-//         var x = initial_x;
-//         var y = initial_y;
-//         var W = canvas.width;
-//         var H = canvas.height;
-//         var w = 10;
-//         var h = 120;
-//         var lineCounter = 1;
-//         var speedConverter = beatsPerFirst * 53 / 4;
-//         x +=  speed / speedConverter;
-//         context.fillRect(x, y, w, h);
-//         if (x > W - 300 && lineCounter < 2) { //lineCounter counts how many lines we've gone through!
-//             // we want the scroller to stop after two lines 
-//             //console.log(lineCounter);
-//             lineCounter += 1;
-//             y += system_spacing;
-//             x = initial_x;
-//             x += speed / speedConverter;
-//             context.fillRect(x,y,w,h);
-//         }
-//         else if (x > W - 300 && lineCounter === 2) {
-//             console.log('timeout cleared');
-//             return undefined;  
-//         }
-//         var timeoutID = window.setTimeout(function(){scrollAcross.draw(speed, context, initial_x, initial_y, system_spacing, beatsPerFirst, beatsPerSecond, callInterval)}, callInterval);
-//     }
-// }
-
-// $('#button-1').click(function() {
-//     var beatsPerExample1 = getBeats[0];
-//     var beatsPerExample2 = getBeats[1];
-//     var x = 100; 
-//     var y = 50;
-//     var w = 10;
-//     var h = 120;
-//     //lineCounter = 1;
-//     var speed = Number($('.slider-speed').val());
-//     if (speed === undefined || speed === 0) {
-//         speed = 80;
-//     }
-//     //check if there's music on the canvas before scrolling!
-//     //if (!isCanvasBlank(canvas)) {
-//     var timeout = setTimeout(function (){scrollAcross.draw(speed, ctx, x, y, 200, beatsPerExample1, beatsPerExample2, 20)}, 2000);
-    
-//     //}
-    
-
-// });
-
-// function start(context) { //why does this function get called when clicking the level 1 button??
-//     console.log('function called');
-//     x = initial_x; 
-//     y = initial_y;
-//     w = 10;
-//     h = 120;
-//     lineCounter = 1;
-//     var speed = Number($('.slider-speed').val());
-//     if (speed === undefined || speed === 0) {
-//         speed = 80;
-//     }
-//     //check if there's music on the canvas before scrolling!
-//     //if (!isCanvasBlank(canvas)) {
-//     var timeout = setTimeout(function (){this.drawer(speed, context)}, 3*60/speed*1000 + 400);
-//     var count = 3 //3 beats
-//     $('#timer').text('countdown:  3');
-//     var counter = setInterval(timer, 55*1000/speed);
-//     var clicker = setInterval(sound, 55*1000/speed);
-//     function sound() {
-//         document.getElementById('click').play(); //no jquery??
-//     }
-    
-//     function timer() {
-//         count = count - 1;
-//         if (count <= 0) {
-//            clearInterval(counter);
-//            clearInterval(clicker);
-//            $('#timer').text('start!');
-//            return;
-//         }
-
-//         $('#timer').text('countdown:  ' + String(count)); // watch for spelling
-//     }
-//     sound();
-            
-//     //}
-    
-
-// }
+}
+   

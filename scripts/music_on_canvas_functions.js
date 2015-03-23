@@ -228,7 +228,8 @@ function makeSightReading(numBarsPerHand, numPhrases, beatsPerMeasure, beatValue
     //need to modify fingering function to search for hand, not clef
     return {beatsPerMeasure: beatsPerMeasure, numBarsPerHand: numBarsPerHand, 
         beatValue: beatValue, key: key, major_or_minor: major_or_minor, timeSig: timeSig,
-        phrases: phrases, clefs: clefs, firstHand: firstHand, secondHand: secondHand, handOrder: handOrder, numPhrases: numPhrases};
+        phrases: phrases, clefs: clefs, firstHand: firstHand, secondHand: secondHand, handOrder: handOrder, numPhrases: numPhrases,
+        numLines: emptyBarLines.length, barsPerLine: emptyBarLines[0].bars_rh.length};
 }
 
 function addFingeringFirstNoteOfStaffLines(phrase, measureNumber, emptyBarLines, hand, highestScaleDegree){
