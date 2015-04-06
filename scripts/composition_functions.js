@@ -79,6 +79,17 @@ function nextHierarchicBeat2(beatsPer, currentBeat){
     }
 }
 
+// function nextHierarchicBeat3(beatsPer, currentLocation){
+//     //currentLocation is a universal spot, not just a beat in the measure but a beat in group of measures
+
+//     var divider = beatsPer % 3 === 0 ? 3 : 2;
+//     if (currentLocation % beatsPer === 0){
+//         return beatsPer;
+//     }
+//     else {
+//         return nextHierarchicBeat3(beatsPer/divider, currentLocation % (beatsPer / divider));
+//     }
+// }
 
 
 

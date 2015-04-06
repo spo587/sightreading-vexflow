@@ -56,7 +56,7 @@ function combineArray(array1, array2){
 
 
 function nestArray(array1, array2){
-    //array 1 is already nested (array or arrrays), array 2 needs to be nested with each inner array matching
+    //array 1 is already nested (array of arrrays), array 2 needs to be nested with each inner array matching
     //the corresponding length of array1
     var array2nested = [];
     var lengths = [];
@@ -138,9 +138,9 @@ function range(num, increment){
     return arr;
 }
 
-function rangeBetter(min, length, increment){
+function rangeBetter(min, max, increment){
     var arr = []
-    for (var i = 0; i < length; i += increment){
+    for (var i = 0; i < max; i += increment){
         arr.push(i + min);
     }
     return arr;

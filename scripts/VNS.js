@@ -1,3 +1,7 @@
+//todo: vns for rhythms given a melody first
+//linked five finger positions
+// counterpoint, add 2nd line for next level
+
 
 
 function makeRandomMelody(melody, remainingLength, highestScaleDegree, open_or_closed){
