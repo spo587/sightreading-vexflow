@@ -1,3 +1,13 @@
+function shuffleArray(array) {
+    for (var i = array.length - 1; i > 0; i--) {
+        var j = Math.floor(Math.random() * (i + 1));
+        var temp = array[i];
+        array[i] = array[j];
+        array[j] = temp;
+    }
+    return array;
+}
+
 function unNestArray(array){
     var unnested = [];
     array.forEach(function(elem, ind, arr){
@@ -7,7 +17,6 @@ function unNestArray(array){
     });
     return unnested;
 }
-
 
 function randomChoiceFromArray(arr){
     return arr[Math.floor(Math.random() * arr.length)]
@@ -77,12 +86,17 @@ function arrayMax(arr){
     });
 }
 
+function numEntriesOf(arr, num){
+    return arr.reduce(function(previous, current){
+        var add = current === num ? 1 : 0;
+        //console.log(add);
+        return previous + add;
+    }, 0);
+}
 
 var arrayUnique = function(a) {
     return a.reduce(function(p, c) {
-        if (p.indexOf(c) < 0) {
-            p.push(c);
-        }
+        if (p.indexOf(c) < 0) p.push(c);
         return p;
     }, []);
 };

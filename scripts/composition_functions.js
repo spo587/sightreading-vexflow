@@ -8,9 +8,22 @@
 function makeLineRhythmsFirst(beatsPerMeasure, numMeasures, level, highestScaleDegree, open_or_closed){
     //this function will make rhythms and melody notes separately, as my current system does.
     //we'll make separate high level functions for the other way around and different combos
+    console.log(open_or_closed);
     var rhythms = generateRhythms(beatsPerMeasure, numMeasures, level)
     var length = findLength(rhythms)
-    var melodyNotes = generateMelody(length, level, highestScaleDegree, open_or_closed)
+    if (level === 3){
+        var randomMelody = makeRandomMelody(undefined, length, highestScaleDegree, open_or_closed);
+        var melodyNotesInts = VNS(randomMelody, 3, 2).scaleDegrees;
+        console.log(melodyNotesInts);
+        var melodyNotes = melodyNotesInts.map(function(current){
+            return String(current);
+        });
+    }
+
+    else {
+        var melodyNotes = generateMelody(length, level, highestScaleDegree, open_or_closed);
+    }
+    //console.log(melodyNotes);
     var melodyNotesNested = nestArray(rhythms, melodyNotes);
     var rhythmsMelodyTogether = combineArray(rhythms, melodyNotes)
     return {rhythms: rhythms, melody: melodyNotesNested, together: rhythmsMelodyTogether};
@@ -65,6 +78,9 @@ function nextHierarchicBeat2(beatsPer, currentBeat){
         return nextHierarchicBeat2(beatsPer/divider, currentBeat % (beatsPer / divider));
     }
 }
+
+
+
 
 function generateMelody(length, level, highestScaleDegree, open_or_closed){
     var notes = makeMelodyAnyLevel(length - 1, level, highestScaleDegree).scaleDegrees;

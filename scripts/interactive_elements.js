@@ -24,11 +24,11 @@ function makeExample(context, level, numPhrases, beatsPerMeasure, beatValue, key
     var beatsPerExample1 = example.beatsPerMeasure;
     //var example2 = makeRandomSightReading(4, level, 4, 10, context2, standardFiveFingerOrNot);
     //var beatsPerExample2 = example2.beatsPer;
-    scrollHandler(beatsPerExample1, example.numLines, example.barsPerLine * 230 + 50, context);
+    //scrollHandler(beatsPerExample1, example.numLines, example.barsPerLine * 230 + 50, context);
     //scrollHandler2(100, 50, beatsPerExample2, 200, 20, context2);
     var ret = [example] //, example2];
     STOREEXAMPLE = STOREEXAMPLE.concat(ret);
-    console.log(STOREEXAMPLE);
+    //console.log(STOREEXAMPLE);
     return ret;
 
 } 
@@ -91,9 +91,19 @@ $('#clearAndReplace').click(function(){clearAndReplace(ctx)});
 
 
 
-var scrollHandler = function(beatsPer, numLines, width, context){
-    $('#button-1').click(function(){scroller(beatsPer, numLines, width, context)}
-    )}
+//var scrollHandler = function(beatsPer, numLines, width, context){
+$('#button-1').click(function(){
+    //scrollHandler(beatsPerExample1, example.numLines, example.barsPerLine * 230 + 50, context);
+    var numcalled = STOREEXAMPLE.length;
+    var example = STOREEXAMPLE[numcalled - 1]
+    var beatsPer = example.beatsPerMeasure;
+    var numLines = example.numLines;
+    var width = example.barsPerLine * 230 + 50;
+    var context = ctx;
+    scroller(beatsPer, numLines, width, context)
+});
+
+
 
 // var scrollHandler2 = function(initial_x, initial_y, beatsPer, system_spacing, callInterval, context){
 //     $('#button-2').click(function(){scroller(initial_x,
@@ -104,12 +114,17 @@ function countdown(speed, beatsPer){
 
 }
 
-function fillIn(speed, width, numLines){
+function fillIn(tempo, beatsPer, width, numLines){
+    //called every 20 milliseconds, goes speed pixels to the right.
+    // if bpm === 4 and tempo = 60, we want 230 pixels for 4 seconds = 57.5 px / sec = 57.5 / 50 px per 20 ms
+
+    //230 px / 3 seconds = 230 / 4 * 4/3
+    var speed = tempo / 48 * 4 / beatsPer;
+    console.log(speed);
     var exitFunction = 0;
     var lineCounter = 1;
-    var initial = - speed * 50 / 20;
+    var initial = - speed * 49;
     var distFromTop = 40;
-    //ctx.fillStyle = 'white';
     f = function(){
         //console.log('f going');
         ctx.fillRect(75, distFromTop, initial, 150);
@@ -117,7 +132,7 @@ function fillIn(speed, width, numLines){
     }
     move = function(){
         //console.log('move going');
-        initial += speed / 20;
+        initial += speed;
         if (initial > width && lineCounter < numLines) {
             distFromTop += 200;
             lineCounter += 1;
@@ -144,10 +159,8 @@ function fillIn(speed, width, numLines){
         var clear = function(){
             clearAndReplace(ctx);
         }
-        var done = setTimeout(clear, 1000);
-        
+        var done = setTimeout(clear, 1000);   
     });
-
 }
 
 
@@ -159,9 +172,8 @@ function scroller(beatsPer, numLines, width, context){
     // activate the countdown
     //pause button
     // exit button and replace with the previous example
-    var speed = Number($('#slider-speed-1').val());
+    var tempo = Number($('#slider-speed-1').val());
     //countdown(speed, beatsPer);
-    fillIn(speed, width, numLines);
-
+    fillIn(tempo, beatsPer, width, numLines);
 }
    

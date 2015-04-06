@@ -277,7 +277,7 @@ function decideTimeSig(level){
     }
     else if (level === 3){
         var beatValue = 4;
-        var beatsPerMeasure = randomChoiceFromArray([2, 3, 4]);
+        var beatsPerMeasure = randomChoiceFromArray([2, 3]);
     }
     return {beatsPerMeasure: beatsPerMeasure, beatValue: beatValue};
 }
@@ -294,15 +294,7 @@ function decideKey(level){
 }
 
 
-function shuffleArray(array) {
-    for (var i = array.length - 1; i > 0; i--) {
-        var j = Math.floor(Math.random() * (i + 1));
-        var temp = array[i];
-        array[i] = array[j];
-        array[j] = temp;
-    }
-    return array;
-}
+
 
 // function decideHighestFingerChoice(major_minor_combo, level){
 //     var major_or_minor = major_minor_combo[1];
