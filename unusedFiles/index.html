@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <script src="https://dl.dropboxusercontent.com/u/95890750/vexflow_sightreading/utilities/head.min.js"></script>
+    <script>
+    head.js('https://dl.dropboxusercontent.com/u/95890750/vexflow_sightreading/utilities/jquery.js',
+            'https://dl.dropboxusercontent.com/u/95890750/vexflow_sightreading/scripts/vexflow-min.js',
+            'https://dl.dropboxusercontent.com/u/95890750/vexflow_sightreading/scripts/vexflow-debug.js',
+            'https://dl.dropboxusercontent.com/u/95890750/vexflow_sightreading/scripts/composition_functions.js',
+            'https://dl.dropboxusercontent.com/u/95890750/vexflow_sightreading/scripts/scales.js',
+            'https://dl.dropboxusercontent.com/u/95890750/vexflow_sightreading/scripts/vexflow_objects.js',
+            'https://dl.dropboxusercontent.com/u/95890750/vexflow_sightreading/scripts/music_on_canvas_functions.js',
+            'https://dl.dropboxusercontent.com/u/95890750/vexflow_sightreading/scripts/interactive_elements.js')
+    </script>
+    <title>
+        The sightreading page
+    </title>
+    
+</head>
+
+<body>
+    <header>
+        <h1> Welcome to the piano sight reading page for beginners (by Sam Post) </h1>
+        <h2> (Designed for use on a tablet computer in Chrome, Safari or Firefox. Do not attempt use with Internet Explorer.) </h2>
+
+    </header>
+
+    <p>
+        <button type='button' id='level-1'>level 1</button>
+        <button type='button' id='level-2'>level 2</button>
+        Optional: tempo <input type='text' class='slider-speed'></input>
+        
+        <button type='button' id='button-1'>start first piece!</button>
+        <button type='button' id='clearAndReplace'> click to recover and retry first piece</button>
+        <audio src="https://dl.dropboxusercontent.com/u/95890750/vexflow_sightreading/sounds/10211%5ERVBCLICK.mp3" type='audio/mpeg' id="click" autostart="false"></audio>
+        
+    </p>
+    <p>
+        
+        First, click level 1 or level 2 to generate two new exercises. <br>
+
+
+        Click the next button to start the first one. There will be 3 beat delay, then the blackout will start scrolling across the screen, so be ready! NEW: turn up your volume to hear the beats counting down to start. You can alter the tempo by putting in your own (in beats per minute). The default tempo is 80 beats per minute, if you leave it blank.
+        Click the last button when you're ready for the second example. <br>
+        WARNING: currently a slight issue with the blackout scroller. Reload the page to get new pieces if you're using it.
+    </p>
+    <p id='timer'> countdown:   </p>
+    <canvas class='canvas-class' id='canvas-1' width="1300" height="400"></canvas>
+            
+                
+    <div id='second-button'>
+    <p>
+        <button type='button' id='button-2'>start second piece!</button>
+
+        Tempo for second piece <input type='text' id='slider-speed-2'></input>
+        <button type='button' id='replace-example-2'>click to retry second one</button>
+    </p>
+    </div>
+    <div id='second-canvas' style="position:absolute; top:800px; left:0px; z-index:1"> 
+    <canvas class='canvas-class' id='canvas-2' width="1300" height="400"></canvas>
